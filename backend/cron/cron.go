@@ -45,7 +45,7 @@ func Run() {
 		global.LOG.Errorf("start my cronjob failed, err: %v", err)
 	}
 	for _, cronjob := range cronJobs {
-		entryID, err := service.ServiceGroupApp.StartJob(&cronjob)
+		entryID, err := service.NewICronjobService().StartJob(&cronjob)
 		if err != nil {
 			global.LOG.Errorf("start %s job %s failed, err: %v", cronjob.Type, cronjob.Name, err)
 		}
