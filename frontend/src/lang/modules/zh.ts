@@ -222,6 +222,7 @@ const message = {
         settings: '面板设置',
         toolbox: '工具箱',
         logs: '面板日志',
+        runtime: '运行环境',
     },
     home: {
         overview: '概览',
@@ -1175,6 +1176,11 @@ const message = {
         argsCheck: 'GET 参数校验',
         postCheck: 'POST 参数校验',
         cookieBlockList: 'Cookie 黑名单',
+    },
+    runtime: {
+        runtime: '运行环境',
+        image: '镜像',
+        workDir: '工作目录',
     },
 };
 export default {

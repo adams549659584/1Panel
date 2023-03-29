@@ -218,6 +218,7 @@ const message = {
         toolbox: 'Toolbox',
         logs: 'Log',
         ssl: 'Certificate',
+        runtime: 'Runtime',
     },
     home: {
         overview: 'Overview',
@@ -1175,6 +1176,11 @@ const message = {
         argsCheck: 'GET parameter check',
         postCheck: 'POST parameter verification',
         cookieBlockList: 'Cookie Blacklist',
+    },
+    runtime: {
+        runtime: 'Runtime',
+        image: 'Image',
+        workDir: 'WorkDir',
     },
 };
 
