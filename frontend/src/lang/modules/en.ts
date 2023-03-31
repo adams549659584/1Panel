@@ -1181,6 +1181,8 @@ const message = {
         cookieBlockList: 'Cookie Blacklist',
 
         firewall: 'Firewall',
+        used: 'Used',
+        unUsed: 'Unused',
         firewallHelper: '{0} System firewall',
         firewallNotStart: 'The firewall service is not enabled at present, please enable it first!',
         stopFirewallHelper:

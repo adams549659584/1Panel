@@ -45,6 +45,17 @@
                     <el-table-column type="selection" fix />
                     <el-table-column :label="$t('firewall.protocol')" :min-width="90" prop="protocol" />
                     <el-table-column :label="$t('firewall.port')" :min-width="120" prop="port" />
+                    <el-table-column :label="$t('commons.table.status')" :min-width="120">
+                        <template #default="{ row }">
+                            <el-tag type="info" v-if="row.isUsed">
+                                {{
+                                    row.appName ? $t('firewall.used') + ' ( ' + row.appName + ' )' : $t('firewall.used')
+                                }}
+                            </el-tag>
+                            <el-tag type="success" v-else>{{ $t('firewall.unUsed') }}</el-tag>
+                        </template>
+                    </el-table-column>
+
                     <el-table-column :min-width="80" :label="$t('firewall.strategy')" prop="strategy">
                         <template #default="{ row }">
                             <el-button

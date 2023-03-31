@@ -42,6 +42,7 @@
 import { Host } from '@/api/interface/host';
 import { loadFireBaseInfo, operateFire } from '@/api/modules/host';
 import i18n from '@/lang';
+import { MsgSuccess } from '@/utils/message';
 import { ElMessageBox } from 'element-plus';
 import { ref } from 'vue';
 
@@ -81,6 +82,7 @@ const onOperate = async (operation: string) => {
         emit('update:status', 'running');
         await operateFire(operation)
             .then(() => {
+                MsgSuccess(i18n.global.t('commons.msg.operationSuccess'));
                 loadBaseInfo(true);
             })
             .catch(() => {
@@ -102,6 +104,7 @@ const onPingOperate = async (operation: string) => {
             operation = operation === 'Disable' ? 'enablePing' : 'disablePing';
             await operateFire(operation)
                 .then(() => {
+                    MsgSuccess(i18n.global.t('commons.msg.operationSuccess'));
                     loadBaseInfo(false);
                 })
                 .catch(() => {

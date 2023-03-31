@@ -20,7 +20,10 @@ func (f *Firewall) Name() string {
 
 func (f *Firewall) Status() (string, error) {
 	stdout, _ := cmd.Exec("firewall-cmd --state")
-	return strings.ReplaceAll(stdout, "\n", ""), nil
+	if stdout == "running\n" {
+		return "running", nil
+	}
+	return "not running", nil
 }
 
 func (f *Firewall) Version() (string, error) {
@@ -121,7 +124,7 @@ func (f *Firewall) ListAddress() ([]FireInfo, error) {
 			continue
 		}
 		itemRule := f.loadInfo(rule)
-		if len(itemRule.Port) == 0 {
+		if len(itemRule.Port) == 0 && len(itemRule.Address) != 0 {
 			datas = append(datas, itemRule)
 		}
 	}

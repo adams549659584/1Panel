@@ -1180,6 +1180,8 @@ const message = {
         cookieBlockList: 'Cookie 黑名单',
 
         firewall: '防火墙',
+        used: '已使用',
+        unUsed: '未使用',
         firewallHelper: '{0}系统防火墙',
         firewallNotStart: '当前未开启防火墙服务，请先开启！',
         stopFirewallHelper: '停用系统防火墙，服务器将失去安全防护，是否继续操作？',
