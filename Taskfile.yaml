@@ -13,24 +13,24 @@ env:
   APP_NAME: 1panel
 
 tasks:
-  build_web_tpl:
-    label: "build_web_tpl -> {{.TASK}}"
+  build-web-tpl:
+    label: "build-web-tpl -> {{.TASK}}"
     dir: "{{.WEB_PATH}}"
     cmds: 
         - npm install
         - npm run build:{{.WEB_MODE}}
 
-  build_web_dev:
+  build-web-dev:
     cmds:
-      - task: build_web_tpl
+      - task: build-web-tpl
         vars: {
           TASK: "{{.TASK}}",
           WEB_MODE: dev
         }
 
-  build_web_pro:
+  build-web-pro:
     cmds:
-      - task: build_web_tpl
+      - task: build-web-tpl
         vars: {
           TASK: "{{.TASK}}",
           WEB_MODE: pro
@@ -38,243 +38,65 @@ tasks:
 
   copy-resource:
     cmds:
-      - cp -rf deploy/* {{.BUILD_PATH}}/{{.APP_NAME}}-{{.BUILD_VERSION}}-{{.GOOS}}-{{.GOARCH}}
+      - cp -rf deploy/* {{.BUILD_PATH}}/{{.APP_NAME}}-{{.BUILD_VERSION}}-{{.TASK}}
 
-  build_bin_tpl:
-    label: "build_bin_tpl -> {{.TASK}}"
+  build-bin-tpl:
+    label: "build-bin-tpl -> {{.TASK}}"
     dir: "{{.SERVER_PATH}}"
     cmds:
       - |
-        CGO_ENABLED=1 GOOS={{.GOOS}} GOARCH={{.GOARCH}} GOARM={{.GOARM}} GOMIPS={{.GOMIPS}} GOAMD64={{.GOAMD64}} go build -trimpath -ldflags '-s -w --extldflags "-static -fpic"' -tags 'osusergo,netgo' -o ../{{.BUILD_PATH}}/{{.APP_NAME}}-{{.BUILD_VERSION}}-{{.GOOS}}-{{.GOARCH}}/{{.APP_NAME}} ../{{.MAIN}}
+        CGO_ENABLED=1 GOOS={{.GOOS}} GOARCH={{.GOARCH}} GOARM={{.GOARM}} GOMIPS={{.GOMIPS}} GOAMD64={{.GOAMD64}} go build -trimpath -ldflags '-s -w --extldflags "-static -fpic"' -tags 'osusergo,netgo' -o ../{{.BUILD_PATH}}/{{.APP_NAME}}-{{.BUILD_VERSION}}-{{.TASK}}/{{.APP_NAME}} ../{{.MAIN}}
       - task: copy-resource
         vars: {
+          TASK: "{{.TASK}}",
           GOOS: "{{.GOOS}}",
           GOARCH: "{{.GOARCH}}"
         }       
 
-  linux_386:
+  linux-amd64:
     dir: "{{.SERVER_PATH}}"
     cmds:
-      - task: build_bin_tpl
-        vars: {
-          TASK: "{{.TASK}}",
-          GOOS: linux,
-          GOARCH: 386
-        }
-  linux_amd64:
-    dir: "{{.SERVER_PATH}}"
-    cmds:
-      - task: build_bin_tpl
+      - task: build-bin-tpl
         vars: {
           TASK: "{{.TASK}}",
           GOOS: linux,
           GOARCH: amd64
         }
-  linux_amd64_v2:
+  linux-amd64-v2:
     dir: "{{.SERVER_PATH}}"
     cmds:
-      - task: build_bin_tpl
+      - task: build-bin-tpl
         vars: {
           TASK: "{{.TASK}}",
           GOOS: linux,
           GOARCH: amd64,
           GOAMD64: v2
         }
-  linux_amd64_v3:
+  linux-amd64-v3:
     dir: "{{.SERVER_PATH}}"
     cmds:
-      - task: build_bin_tpl
+      - task: build-bin-tpl
         vars: {
           TASK: "{{.TASK}}",
           GOOS: linux,
           GOARCH: amd64,
           GOAMD64: v3
         }
-  linux_amd64_v4:
+  linux-amd64-v4:
     dir: "{{.SERVER_PATH}}"
     cmds:
-      - task: build_bin_tpl
+      - task: build-bin-tpl
         vars: {
           TASK: "{{.TASK}}",
           GOOS: linux,
           GOARCH: amd64,
           GOAMD64: v4
-        }
-  linux_armv5:
-    dir: "{{.SERVER_PATH}}"
-    cmds:
-      - task: build_bin_tpl
-        vars: {
-          TASK: "{{.TASK}}",
-          GOOS: linux,
-          GOARCH: arm,
-          GOARM: 5
-        }
-  linux_armv6:
-    dir: "{{.SERVER_PATH}}"
-    cmds:
-      - task: build_bin_tpl
-        vars: {
-          TASK: "{{.TASK}}",
-          GOOS: linux,
-          GOARCH: arm,
-          GOARM: 6
-        }
-  linux_armv7:
-    dir: "{{.SERVER_PATH}}"
-    cmds:
-      - task: build_bin_tpl
-        vars: {
-          TASK: "{{.TASK}}",
-          GOOS: linux,
-          GOARCH: arm,
-          GOARM: 7
-        }
-  linux_armv8:
-    dir: "{{.SERVER_PATH}}"
-    cmds:
-      - task: build_bin_tpl
-        vars: {
-          TASK: "{{.TASK}}",
-          GOOS: linux,
-          GOARCH: arm64
-        }
-  linux_mips_hardfloat:
-    dir: "{{.SERVER_PATH}}"
-    cmds:
-      - task: build_bin_tpl
-        vars: {
-          TASK: "{{.TASK}}",
-          GOOS: linux,
-          GOARCH: mips,
-          GOMIPS: hardfloat
-        }
-  linux_mipsle_softfloat:
-    dir: "{{.SERVER_PATH}}"
-    cmds:
-      - task: build_bin_tpl
-        vars: {
-          TASK: "{{.TASK}}",
-          GOOS: linux,
-          GOARCH: mipsle,
-          GOMIPS: softfloat
-        }
-  linux_mipsle_hardfloat:
-    dir: "{{.SERVER_PATH}}"
-    cmds:
-      - task: build_bin_tpl
-        vars: {
-          TASK: "{{.TASK}}",
-          GOOS: linux,
-          GOARCH: mipsle,
-          GOMIPS: hardfloat
-        }
-  linux_mips64:
-    dir: "{{.SERVER_PATH}}"
-    cmds:
-      - task: build_bin_tpl
-        vars: {
-          TASK: "{{.TASK}}",
-          GOOS: linux,
-          GOARCH: mips64
-        }
-  linux_mips64le:
-    dir: "{{.SERVER_PATH}}"
-    cmds:
-      - task: build_bin_tpl
-        vars: {
-          TASK: "{{.TASK}}",
-          GOOS: linux,
-          GOARCH: mips64le
-        }
-  windows_386.exe:
-    dir: "{{.SERVER_PATH}}"
-    cmds:
-      - task: build_bin_tpl
-        vars: {
-          TASK: "{{.TASK}}",
-          GOOS: windows,
-          GOARCH: 386
-        }
-  windows_amd64.exe:
-    dir: "{{.SERVER_PATH}}"
-    cmds:
-      - task: build_bin_tpl
-        vars: {
-          TASK: "{{.TASK}}",
-          GOOS: windows,
-          GOARCH: amd64
-        }
-  windows_amd64_v2.exe:
-    dir: "{{.SERVER_PATH}}"
-    cmds:
-      - task: build_bin_tpl
-        vars: {
-          TASK: "{{.TASK}}",
-          GOOS: windows,
-          GOARCH: amd64,
-          GOAMD64: v2
-        }
-  windows_amd64_v3.exe:
-    dir: "{{.SERVER_PATH}}"
-    cmds:
-      - task: build_bin_tpl
-        vars: {
-          TASK: "{{.TASK}}",
-          GOOS: windows,
-          GOARCH: amd64,
-          GOAMD64: v3
-        }
-  windows_amd64_v4.exe:
-    dir: "{{.SERVER_PATH}}"
-    cmds:
-      - task: build_bin_tpl
-        vars: {
-          TASK: "{{.TASK}}",
-          GOOS: windows,
-          GOARCH: amd64,
-          GOAMD64: v4
-        }
-  darwin_amd64:
-    dir: "{{.SERVER_PATH}}"
-    cmds:
-      - task: build_bin_tpl
-        vars: {
-          TASK: "{{.TASK}}",
-          GOOS: darwin,
-          GOARCH: amd64,
-        }
-  darwin_arm64:
-    dir: "{{.SERVER_PATH}}"
-    cmds:
-      - task: build_bin_tpl
-        vars: {
-          TASK: "{{.TASK}}",
-          GOOS: darwin,
-          GOARCH: arm64,
         }
 
   default:
     cmds:
-      - task: build_web_dev
-      - task: linux_386
-      - task: linux_amd64
-      - task: linux_amd64_v2
-      - task: linux_amd64_v3
-      - task: linux_amd64_v4
-      - task: linux_armv5
-      - task: linux_armv6
-      - task: linux_armv7
-      - task: linux_armv8
-      - task: linux_mips_hardfloat
-      - task: linux_mipsle_softfloat
-      - task: linux_mipsle_hardfloat
-      - task: linux_mips64
-      - task: linux_mips64le
-      - task: windows_386.exe
-      - task: windows_amd64.exe
-      - task: windows_amd64_v2.exe
-      - task: windows_amd64_v3.exe
-      - task: windows_amd64_v4.exe
-      - task: darwin_amd64
-      - task: darwin_arm64
+      - task: build-web-dev
+      - task: linux-amd64
+      - task: linux-amd64-v2
+      - task: linux-amd64-v3
+      - task: linux-amd64-v4
