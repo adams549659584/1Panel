@@ -30,9 +30,9 @@ jobs:
       - name: Install Task
         uses: arduino/setup-task@v1          
 
-      - name: Build
+      - name: Build Web
         run: |
-          task
+          task build_web_dev
 
       - name: Deploy Web
         uses: peaceiris/actions-gh-pages@v3
@@ -41,6 +41,10 @@ jobs:
           publish_dir: ./cmd/server/web # 静态文件所在的目录
           publish_branch: ${{ github.ref_name }}-static # 部署到的分支
           force_orphan: true # 如果发布分支不存在，创建一个新的分支
+
+      - name: Build Release
+        run: |
+          task linux_amd64          
 
       - name: Deploy Release
         uses: softprops/action-gh-release@v1
