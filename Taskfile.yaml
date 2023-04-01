@@ -257,7 +257,7 @@ tasks:
 
   default:
     cmds:
-      - task: build_web_pro
+      - task: build_web_dev
       - task: linux_386
       - task: linux_amd64
       - task: linux_amd64_v2
