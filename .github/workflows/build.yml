@@ -46,7 +46,8 @@ jobs:
 
       - name: Build Release
         run: |
-          task release
+          # task release
+          task linux-amd64
 
       - name: Get version
         id: get_version
