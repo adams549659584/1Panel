@@ -44,11 +44,12 @@ jobs:
 
       - name: Build Release
         run: |
-          task linux-amd64
+          task release
 
       - name: Get version
         id: get_version
-        run: echo "BUILD_VERSION=$(git describe --tags --abbrev=0)" >> $GITHUB_OUTPUT                 
+        # run: echo "BUILD_VERSION=$(git describe --tags --abbrev=0)" >> $GITHUB_OUTPUT # 不带hash                
+        run: echo "BUILD_VERSION=$(git describe --tags)" >> $GITHUB_OUTPUT # 带hash                
 
       - name: Deploy Release
         uses: softprops/action-gh-release@v1

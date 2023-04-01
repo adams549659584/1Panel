@@ -38,9 +38,6 @@ tasks:
 
   deploy-release:
     dir: "{{.BUILD_PATH}}"
-    vars: {
-      TASK: linux-amd64
-    }
     cmds:
       - cp -rf ../deploy/* {{.APP_NAME}}-{{.BUILD_VERSION}}-{{.TASK}}
       - tar -czvf {{.APP_NAME}}-{{.BUILD_VERSION}}-{{.TASK}}.tar.gz {{.APP_NAME}}-{{.BUILD_VERSION}}-{{.TASK}}/
@@ -99,10 +96,14 @@ tasks:
           GOAMD64: v4
         }
 
-  default:
+  release:
     cmds:
-      - task: build-web-dev
       - task: linux-amd64
       - task: linux-amd64-v2
       - task: linux-amd64-v3
-      - task: linux-amd64-v4
+      - task: linux-amd64-v4      
+
+  default:
+    cmds:
+      - task: build-web-dev
+      - task: release
