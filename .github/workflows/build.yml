@@ -12,6 +12,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      NODE_OPTIONS: "--max_old_space_size=4096"
     permissions:
       contents: write
     steps:
@@ -29,8 +31,6 @@ jobs:
         uses: arduino/setup-task@v1          
 
       - name: Build
-        env:
-          NODE_OPTIONS: "--max_old_space_size=4096"
         run: |
           task
 
