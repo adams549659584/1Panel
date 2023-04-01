@@ -1,13 +1,24 @@
 # 1Panel 安装包
 
 ```sh
-VERSION="v1.0.5" && \
+# 下载最新、解压 并进入
 GOARCH="amd64" && \
-tar zxvf 1panel-${VERSION}-linux-${GOARCH}.tar.gz && \
-rm -rf 1panel-${VERSION}-linux-${GOARCH}.tar.gz && \
-cd 1panel-${VERSION}-linux-${GOARCH} && \
-sudo chmod +x ./install.sh && \
-sudo ./install.sh
+# VERSION="v1.0.5" && \
+VERSION=`curl -s https://api.github.com/repos/adams549659584/1Panel/releases/latest | grep tag_name | awk '{print $2}' | sed 's/[",]//g'`
+PACKAGE_NAME="1panel-${VERSION}-linux-${GOARCH}" && \
+PACKAGE_FILE_NAME="1panel-${VERSION}-linux-${GOARCH}.tar.gz" && \
+PACKAGE_DOWNLOAD_URL="https://github.com/adams549659584/1Panel/releases/download/${VERSION}/${PACKAGE_FILE_NAME}" && \
+# echo $PACKAGE_DOWNLOAD_URL && \
+curl -LOk -o ${PACKAGE_FILE_NAME} ${PACKAGE_DOWNLOAD_URL} && \
+tar zxvf ${PACKAGE_FILE_NAME} && \
+rm -rf ${PACKAGE_FILE_NAME} && \
+cd ${PACKAGE_NAME}
+
+# 安装
+sudo chmod +x ./install.sh && sudo ./install.sh
+
+# 卸载，不卸载 docker 及 docker-compose
+sudo chmod +x ./uninstall.sh && sudo ./uninstall.sh
 ```
 
 [1Panel](https://github.com/1Panel-dev/1Panel) 是一个现代化、开源的 Linux 服务器运维管理面板。
