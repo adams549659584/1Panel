@@ -44,10 +44,15 @@ jobs:
 
       - name: Build Release
         run: |
-          task linux-amd64          
+          task linux-amd64
+
+      - name: Get version
+        id: get_version
+        run: echo ::set-output name=BUILD_VERSION::git describe --tags                    
 
       - name: Deploy Release
         uses: softprops/action-gh-release@v1
         with:
+          name: ${{ steps.get_version.outputs.BUILD_VERSION }}
           token: ${{ secrets.GHP_TOKEN }}
           files: build/*          
