@@ -3,7 +3,7 @@ version: '3'
 
 vars:
   BUILD_VERSION:
-    sh: git describe --tags
+    sh: git describe --tags --abbrev=0
 
 env:
   BUILD_PATH: build
@@ -17,7 +17,6 @@ tasks:
     label: "build_web_tpl -> {{.TASK}}"
     dir: "{{.WEB_PATH}}"
     cmds: 
-        # - echo hello
         - npm install
         - npm run build:{{.WEB_MODE}}
 
@@ -39,7 +38,7 @@ tasks:
 
   copy-resource:
     cmds:
-      - cp -rf deploy/* ../{{.BUILD_PATH}}/{{.APP_NAME}}-{{.BUILD_VERSION}}-{{.GOOS}}-{{.GOARCH}}
+      - cp -rf deploy/* {{.BUILD_PATH}}/{{.APP_NAME}}-{{.BUILD_VERSION}}-{{.GOOS}}-{{.GOARCH}}
 
   build_bin_tpl:
     label: "build_bin_tpl -> {{.TASK}}"

@@ -1,5 +1,9 @@
 # 1Panel 安装包
 
+```sh
+sudo chmod +x ./install.sh && ./install.sh
+```
+
 [1Panel](https://github.com/1Panel-dev/1Panel) 是一个现代化、开源的 Linux 服务器运维管理面板。
 
 该项目为 1Panel 安装包相关内容，包含了 1Panel 的安装脚本及默认配置文件等。
