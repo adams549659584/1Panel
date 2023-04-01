@@ -1,0 +1,43 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - 'my-dev'
+    tags:
+      - 'v*'
+  # watch:
+  #   types: [started]
+
+jobs:
+  build-static:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          cache: 'npm'
+
+      - name: Install Task
+        uses: arduino/setup-task@v1          
+
+      - name: Build
+        run: |
+          task
+
+      - name: Deploy Web
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          personal_token: ${{ secrets.GHP_TOKEN }}
+          publish_dir: ./cmd/server/web # 静态文件所在的目录
+          publish_branch: ${{ github.ref_name }}-static # 部署到的分支
+          force_orphan: true # 如果发布分支不存在，创建一个新的分支
+
+      - name: Deploy Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          token: ${{ secrets.GHP_TOKEN }}
+          files: build/*          
