@@ -36,9 +36,15 @@ tasks:
           WEB_MODE: pro
         }  
 
-  copy-resource:
+  deploy-release:
+    dir: "{{.BUILD_PATH}}"
+    vars: {
+      TASK: linux-amd64
+    }
     cmds:
-      - cp -rf deploy/* {{.BUILD_PATH}}/{{.APP_NAME}}-{{.BUILD_VERSION}}-{{.TASK}}
+      - cp -rf ../deploy/* {{.APP_NAME}}-{{.BUILD_VERSION}}-{{.TASK}}
+      - tar -czvf {{.APP_NAME}}-{{.BUILD_VERSION}}-{{.TASK}}.tar.gz {{.APP_NAME}}-{{.BUILD_VERSION}}-{{.TASK}}/
+      # - rm -rf {{.APP_NAME}}-{{.BUILD_VERSION}}-{{.TASK}}
 
   build-bin-tpl:
     label: "build-bin-tpl -> {{.TASK}}"
@@ -46,7 +52,7 @@ tasks:
     cmds:
       - |
         CGO_ENABLED=1 GOOS={{.GOOS}} GOARCH={{.GOARCH}} GOARM={{.GOARM}} GOMIPS={{.GOMIPS}} GOAMD64={{.GOAMD64}} go build -trimpath -ldflags '-s -w --extldflags "-static -fpic"' -tags 'osusergo,netgo' -o ../{{.BUILD_PATH}}/{{.APP_NAME}}-{{.BUILD_VERSION}}-{{.TASK}}/{{.APP_NAME}} ../{{.MAIN}}
-      - task: copy-resource
+      - task: deploy-release
         vars: {
           TASK: "{{.TASK}}",
           GOOS: "{{.GOOS}}",
