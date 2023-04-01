@@ -1,7 +1,13 @@
 # 1Panel 安装包
 
 ```sh
-sudo chmod +x ./install.sh && ./install.sh
+VERSION="v1.0.5" && \
+GOARCH="amd64" && \
+tar zxvf 1panel-${VERSION}-linux-${GOARCH}.tar.gz && \
+rm -rf 1panel-${VERSION}-linux-${GOARCH}.tar.gz && \
+cd 1panel-${VERSION}-linux-${GOARCH} && \
+sudo chmod +x ./install.sh && \
+sudo ./install.sh
 ```
 
 [1Panel](https://github.com/1Panel-dev/1Panel) 是一个现代化、开源的 Linux 服务器运维管理面板。

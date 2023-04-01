@@ -94,8 +94,9 @@ function Install_Compose(){
     docker-compose version >/dev/null 2>&1
     if [[ $? -ne 0 ]]; then
         log "... 在线安装 docker-compose"
-        
-        curl -L https://github.com/docker/compose/releases/download/v2.17.2/docker-compose-$(uname -s | tr A-Z a-z)-`uname -m` -o /usr/local/bin/docker-compose 2>&1 | tee -a ${CURRENT_DIR}/install.log
+        DOCKER_COMPOSE_VERSION=`curl -s https://api.github.com/repos/docker/compose/releases/latest | grep tag_name | awk '{print $2}' | sed 's/[",]//g'`
+        log "安装版本 $DOCKER_COMPOSE_VERSION"
+        curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-$(uname -s | tr A-Z a-z)-`uname -m` -o /usr/local/bin/docker-compose 2>&1 | tee -a ${CURRENT_DIR}/install.log
         if [[ ! -f /usr/local/bin/docker-compose ]];then
             log "docker-compose 下载失败，请稍候重试"
             exit 1
