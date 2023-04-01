@@ -48,11 +48,12 @@ jobs:
 
       - name: Get version
         id: get_version
-        run: echo ::set-output name=BUILD_VERSION::git describe --tags                    
+        run: echo "BUILD_VERSION=v1.0.5" >> $GITHUB_OUTPUT                 
 
       - name: Deploy Release
         uses: softprops/action-gh-release@v1
         with:
+          tag_name: ${{ steps.get_version.outputs.BUILD_VERSION }}
           name: ${{ steps.get_version.outputs.BUILD_VERSION }}
           token: ${{ secrets.GHP_TOKEN }}
           files: build/*          
