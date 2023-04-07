@@ -9,7 +9,8 @@ system:
   port: 9999
 
 log:
-  level: debug
+  # panic fatal error warn info debug trace
+  level: info
   time_zone: Asia/Shanghai
   log_name: 1Panel
   log_suffix: .log
