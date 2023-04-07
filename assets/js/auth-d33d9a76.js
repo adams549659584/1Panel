@@ -1,0 +1,1 @@
+import{h as t}from"./index-e09fb15b.js";const o=s=>t.post("/auth/login",s),n=s=>t.post("/auth/mfalogin",s),r=()=>t.get("/auth/captcha"),e=()=>t.post("/auth/logout"),u=()=>t.get("/auth/status"),c=s=>t.post("/auth/init",s),i=()=>t.get("/auth/demo");export{i as a,e as b,u as c,r as g,c as i,o as l,n as m};

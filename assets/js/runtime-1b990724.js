@@ -1,0 +1,1 @@
+import{h as e}from"./index-e09fb15b.js";const r=t=>e.post("/runtimes/search",t),n=t=>e.post("/runtimes",t),u=t=>e.post("/runtimes/del",t),m=t=>e.get(`/runtimes/${t}`),o=t=>e.post("/runtimes/update",t);export{n as C,u as D,m as G,r as S,o as U};

@@ -1,0 +1,1 @@
+import{a7 as i,a8 as n}from"./index-609fd921.js";const a=["/login","/error"],r=i({id:"MenuState",state:()=>({isCollapse:!1,menuList:[]}),getters:{},actions:{async setCollapse(){this.isCollapse=!this.isCollapse},async setMenuList(s){const e=s.filter(t=>a.indexOf(t.path)<0);this.menuList=e}},persist:n("MenuStore")});export{r as M};
