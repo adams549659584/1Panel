@@ -1,0 +1,1 @@
+import{h as r}from"./index-5ffc91ba.js";const s=t=>r.post("/groups/search",t),p=t=>r.post("/groups",t),e=t=>r.post("/groups/update",t),u=t=>r.post("/groups/del",{id:t});export{p as C,u as D,s as G,e as U};
