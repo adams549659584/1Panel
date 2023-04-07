@@ -39,3 +39,29 @@ repo_url | https://resource.fit2cloud.com/1panel/package
         alias /usr/share/nginx/html/res/1panel/package/dev/appstore/$2;
     }
 ```
+
+# 面板配置
+
+1. 复制 cmd/server/conf/app.yaml 至 /opt/1panel/conf/app.yaml
+
+2. sudo 1pctl restart 
+
+```yaml
+system:
+  db_file: 1Panel.db
+  base_dir: /opt
+  mode: dev
+  repo_url: https://resource.fit2cloud.com/1panel/package
+  # repo_url: http://res.vcanbb.com/1panel/package
+  # repo_url: https://raw.githubusercontent.com/adams549659584/1Panel/my-dev/package  
+  is_demo: false
+  # 不想改动原来的，则留空
+  port: 
+
+log:
+  level: debug
+  time_zone: Asia/Shanghai
+  log_name: 1Panel
+  log_suffix: .log
+  max_backup: 10
+```
