@@ -1,0 +1,132 @@
+#!/bin/bash
+
+# 要管理员权限
+if [[ $EUID -ne 0 ]]; then
+    echo "此脚本必须以root身份运行。请使用sudo运行。" 
+    exit 1
+fi
+
+action=$1
+target=$2
+args=$@
+
+BASE_DIR=/opt
+PANEL_PORT=9999
+ORIGINAL_INSTALLED_VERSION=v1.0.5
+
+function usage() {
+    echo "1Panel 控制脚本"
+    echo
+    echo "Usage: "
+    echo "  ./1pctl [COMMAND] [ARGS...]"
+    echo "  ./1pctl --help"
+    echo
+    echo "Commands: "
+    echo "  status          查看 1Panel 服务运行状态"
+    echo "  start           启动 1Panel 服务"
+    echo "  stop            停止 1Panel 服务"
+    echo "  restart         重启 1Panel 服务"
+    echo "  uninstall       卸载 1Panel 服务"
+    echo "  user-info       获取 1Panel 用户信息"
+    echo "  version         查看 1Panel 版本信息"
+}
+function status() {
+    systemctl status 1panel.service
+}
+function start() {
+    systemctl start 1panel.service
+    status
+}
+function stop() {
+    systemctl stop 1panel.service
+    status
+}
+function restart() {
+    systemctl restart 1panel.service
+    status
+}
+function uninstall() {
+    read -p "卸载将会完全清除 1Panel 服务和数据目录，是否继续 [y/n] : " yn
+    if [ "$yn" == "Y" ] || [ "$yn" == "y" ]; then
+        echo -e "================== 开始卸载 1Panel Linux 服务器运维管理面板 =================="
+        echo -e ""
+        echo -e "1) 停止 1Panel 服务进程..."
+        systemctl stop 1panel.service
+    else
+        exit 0
+    fi
+
+    echo -e "2) 删除 1Panel 服务和数据目录..."
+    rm -rf $BASE_DIR/1panel /usr/local/bin/{1pctl,1panel} /etc/systemd/system/1panel.service
+
+    Set_Firewall
+
+    echo -e "3) 重新加载服务配置文件..."
+    systemctl daemon-reload
+    systemctl reset-failed
+
+    echo -e ""
+    echo -e "================================== 卸载完成 =================================="
+}
+function Set_Firewall(){
+    if which firewall-cmd >/dev/null 2>&1; then
+        if systemctl status firewalld | grep -q "Active: active" >/dev/null 2>&1;then
+            echo -e "2.1) 防火墙关闭 $PANEL_PORT 端口"
+            firewall-cmd --zone=public --remove-port=$PANEL_PORT/tcp --permanent
+            firewall-cmd --reload
+        else
+            echo -e "2.1) 防火墙未开启，忽略端口关闭"
+        fi
+    fi
+
+    if which ufw >/dev/null 2>&1; then
+        if systemctl status ufw | grep -q "Active: active" >/dev/null 2>&1;then
+            echo -e "2.1) 防火墙关闭 $PANEL_PORT 端口"
+            ufw deny $PANEL_PORT/tcp
+            ufw reload
+        else
+            echo -e "2.1) 防火墙未开启，忽略端口关闭"
+        fi
+    fi
+}
+function user-info() {
+    1panel user-info
+}
+function version() {
+    1panel version
+}
+
+function main() {
+    case "${action}" in
+        status)
+            status
+            ;;
+        start)
+            start
+            ;;
+        stop)
+            stop
+            ;;
+        restart)
+            restart
+            ;;
+        uninstall)
+            uninstall
+            ;;
+        user-info)
+            user-info
+            ;;
+        version)
+            version
+            ;;
+        help)
+            usage
+            ;;
+        --help)
+            usage
+            ;;
+        *)
+        echo "不支持的参数，请使用 help 或 --help 参数获取帮助"
+    esac
+}
+main

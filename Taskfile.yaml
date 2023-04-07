@@ -1,0 +1,135 @@
+# https://taskfile.dev
+version: '3'
+
+vars:
+  BUILD_VERSION:
+    sh: git describe --tags --abbrev=0
+
+env:
+  BUILD_PATH: build
+  WEB_PATH: frontend
+  SERVER_PATH: backend
+  MAIN: "cmd/server/main.go"
+  APP_NAME: 1panel
+
+tasks:
+  build-web-tpl:
+    label: "build-web-tpl -> {{.TASK}}"
+    dir: "{{.WEB_PATH}}"
+    cmds: 
+        - npm install
+        - npm run build:{{.WEB_MODE}}
+
+  build-web-dev:
+    cmds:
+      - task: build-web-tpl
+        vars: {
+          TASK: "{{.TASK}}",
+          WEB_MODE: dev
+        }
+
+  build-web-pro:
+    cmds:
+      - task: build-web-tpl
+        vars: {
+          TASK: "{{.TASK}}",
+          WEB_MODE: pro
+        }  
+
+  deploy-release:
+    dir: "{{.BUILD_PATH}}"
+    cmds:
+      # 复制
+      - cp -rf ../deploy/* {{.APP_NAME}}-{{.BUILD_VERSION}}-{{.TASK}}
+      # 修改版本号
+      - sed -i 's/ORIGINAL_INSTALLED_VERSION.*/ORIGINAL_INSTALLED_VERSION={{.BUILD_VERSION}}/g' {{.APP_NAME}}-{{.BUILD_VERSION}}-{{.TASK}}/1pctl 
+      # 压缩
+      - tar -czvf {{.APP_NAME}}-{{.BUILD_VERSION}}-{{.TASK}}.tar.gz {{.APP_NAME}}-{{.BUILD_VERSION}}-{{.TASK}}/
+      # 复制到 package
+      # - mkdir -p ../package/dev/{{.BUILD_VERSION}}/release
+      # - cp -f {{.APP_NAME}}-{{.BUILD_VERSION}}-{{.TASK}}.tar.gz ../package/dev/{{.BUILD_VERSION}}/release/{{.APP_NAME}}-{{.BUILD_VERSION}}-{{.TASK}}.tar.gz
+      # - echo -e "## 更新时间\n\n$(date '+%Y年%m月%d日 %H:%M:%S')" > ../package/dev/{{.BUILD_VERSION}}/release/{{.APP_NAME}}-{{.BUILD_VERSION}}-release-notes
+      # - rm -rf {{.APP_NAME}}-{{.BUILD_VERSION}}-{{.TASK}}
+    
+  upx-bin:
+    dir: "{{.BUILD_PATH}}"
+    cmds:
+      - upx {{.APP_NAME}}-{{.BUILD_VERSION}}-{{.TASK}}/{{.APP_NAME}}
+
+  build-bin-tpl:
+    label: "build-bin-tpl -> {{.TASK}}"
+    dir: "{{.SERVER_PATH}}"
+    cmds:
+      - rm -rf ../{{.BUILD_PATH}}
+      - |
+        CGO_ENABLED=1 GOOS={{.GOOS}} GOARCH={{.GOARCH}} GOARM={{.GOARM}} GOMIPS={{.GOMIPS}} GOAMD64={{.GOAMD64}} go build -trimpath -ldflags '-s -w --extldflags "-static -fpic"' -tags 'osusergo,netgo' -o ../{{.BUILD_PATH}}/{{.APP_NAME}}-{{.BUILD_VERSION}}-{{.TASK}}/{{.APP_NAME}} ../{{.MAIN}}
+      - task: upx-bin
+        vars: {
+          TASK: "{{.TASK}}",
+          GOOS: "{{.GOOS}}",
+          GOARCH: "{{.GOARCH}}"
+        }   
+      - task: deploy-release
+        vars: {
+          TASK: "{{.TASK}}",
+          GOOS: "{{.GOOS}}",
+          GOARCH: "{{.GOARCH}}"
+        }       
+
+  linux-amd64:
+    dir: "{{.SERVER_PATH}}"
+    cmds:
+      - task: build-bin-tpl
+        vars: {
+          TASK: "{{.TASK}}",
+          GOOS: linux,
+          GOARCH: amd64
+        }
+  linux-amd64-v2:
+    dir: "{{.SERVER_PATH}}"
+    cmds:
+      - task: build-bin-tpl
+        vars: {
+          TASK: "{{.TASK}}",
+          GOOS: linux,
+          GOARCH: amd64,
+          GOAMD64: v2
+        }
+  linux-amd64-v3:
+    dir: "{{.SERVER_PATH}}"
+    cmds:
+      - task: build-bin-tpl
+        vars: {
+          TASK: "{{.TASK}}",
+          GOOS: linux,
+          GOARCH: amd64,
+          GOAMD64: v3
+        }
+  linux-amd64-v4:
+    dir: "{{.SERVER_PATH}}"
+    cmds:
+      - task: build-bin-tpl
+        vars: {
+          TASK: "{{.TASK}}",
+          GOOS: linux,
+          GOARCH: amd64,
+          GOAMD64: v4
+        }
+
+  # task package -- dev v1.0.5
+  package:
+    dir: package
+    cmds:
+      - /bin/bash download.sh {{.CLI_ARGS}}
+        
+  release:
+    cmds:
+      - task: linux-amd64
+      - task: linux-amd64-v2
+      - task: linux-amd64-v3
+      - task: linux-amd64-v4      
+
+  default:
+    cmds:
+      - task: build-web-dev
+      - task: release

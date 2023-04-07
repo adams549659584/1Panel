@@ -64,17 +64,33 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
             AutoImport({
                 resolvers: [
                     ElementPlusResolver({
-                        importStyle: 'sass',
+												// 使用unplugin-vue-components按需加载样式，开发环境会导致项目异常卡顿
+												// 导致原因：vite会预加载style，当首次启动 vite 服务时会对 style 进行依赖预构建，，因为element-plus的按需样式会导入大量style文件，导致页面会卡住直至style构建完成
+												// https://github.com/antfu/unplugin-vue-components/issues/361
+												//  这里开发环境不按需加载样式，生产环境才按需加载样式
+                        importStyle: mode === 'development' ? false : 'sass',
                     }),
                 ],
             }),
             Components({
                 resolvers: [
                     ElementPlusResolver({
-                        importStyle: 'sass',
+                        importStyle: mode === 'development' ? false : 'sass',
                     }),
                 ],
             }),
+						// 这里自定义一个vite插件，更改src/main.ts内容，开发环境全局引入样式
+            {
+								name: 'import-element-plus-style',
+								transform(code, id) {
+										if (mode === 'development' && /src\/main.ts$/.test(id)) {
+												return {
+														code: `import 'element-plus/dist/index.css';${code}`,
+														map: null,
+												};
+										}
+								},
+						},
         ],
         esbuild: {
             pure: viteEnv.VITE_DROP_CONSOLE ? ['console.log', 'debugger'] : [],

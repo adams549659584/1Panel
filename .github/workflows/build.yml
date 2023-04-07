@@ -1,0 +1,65 @@
+name: Build
+
+on:
+  push:
+    # branches:
+    #   - 'my-dev'
+    tags:
+      - 'v*'
+  # watch:
+  #   types: [started]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      NODE_OPTIONS: "--max_old_space_size=4096"
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install Task
+        uses: arduino/setup-task@v1          
+
+      - name: Build Web
+        run: |
+          task build-web-pro
+
+      - name: Deploy Web
+        uses: peaceiris/actions-gh-pages@v3
+        env:
+          BRANCH_NAME: ${{ github.head_ref || github.ref_name }}        
+        with:
+          personal_token: ${{ secrets.GHP_TOKEN }}
+          publish_dir: cmd/server/web # 静态文件所在的目录
+          publish_branch: ${{ env.BRANCH_NAME }}-static # 部署到的分支
+          force_orphan: true # 如果发布分支不存在，创建一个新的分支
+
+      - name: Build Release
+        run: |
+          sudo apt-get install -y upx-ucl && \
+          # task release
+          task linux-amd64
+
+      - name: Get version
+        id: get_version
+        run: echo "BUILD_VERSION=$(git describe --tags --abbrev=0)" >> $GITHUB_OUTPUT # 不带hash                
+        # run: echo "BUILD_VERSION=$(git describe --tags)" >> $GITHUB_OUTPUT # 带hash                
+
+      - name: Deploy Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.get_version.outputs.BUILD_VERSION }}
+          name: ${{ steps.get_version.outputs.BUILD_VERSION }}
+          token: ${{ secrets.GHP_TOKEN }}
+          files: |
+            build/*.tar.gz          

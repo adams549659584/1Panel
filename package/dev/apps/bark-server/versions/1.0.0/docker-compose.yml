@@ -1,0 +1,20 @@
+version: '3'
+services:
+  bark-server:
+    image: adams549659584/bark-server:latest
+    container_name: ${CONTAINER_NAME}
+    # 自启动
+    restart: unless-stopped
+    # 加入指定网络
+    networks:
+      - 1panel-network
+    volumes:
+      - ./data:/data
+    ports:
+      - ${PANEL_APP_PORT_HTTP}:8080
+    # 使用 mysql mariadb
+    command: bark-server -dsn="${PANEL_DB_USER}:${PANEL_DB_USER_PASSWORD}@tcp(${PANEL_DB_HOST}:3306)/${PANEL_DB_NAME}"     
+
+networks:
+  1panel-network:
+    external: true

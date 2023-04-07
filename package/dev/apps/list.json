@@ -1,0 +1,157 @@
+{
+  "version": "v0.0.39",
+  "tags": [
+    {
+      "key": "WebSite",
+      "name": "建站"
+    },
+    {
+      "key": "Server",
+      "name": "Web 服务器"
+    },
+    {
+      "key": "Database",
+      "name": "数据库"
+    },
+    {
+      "key": "Tool",
+      "name": "工具"
+    },
+    {
+      "key": "CI/CD",
+      "name": "CI/CD"
+    },
+    {
+      "key": "Runtime",
+      "name": "运行环境"
+    }
+  ],
+  "items": [
+    {
+      "key": "portainer",
+      "name": "Portainer",
+      "tags": [
+        "Tool"
+      ],
+      "versions": [
+        "1.25.0"
+      ],
+      "shortDescZh": "一个 Docker 管理工具",
+      "shortDescEn": "Portainer accelerates container adoption. It reduces operational complexity and addresses the security challenges of running containers in Docker, Swarm, Nomad and Kubernetes. ",
+      "type": "tool",
+      "limit": 0,
+      "crossVersionUpdate": false,
+      "website": "https://www.portainer.io/installation/",
+      "github": "https://github.com/portainer/portainer",
+      "document": "https://documentation.portainer.io/"
+    },
+    {
+      "key": "aria2",
+      "name": "Aria2",
+      "tags": [
+        "Tool"
+      ],
+      "versions": [
+        "1.0.0"
+      ],
+      "shortDescZh": "这是一个超快的下载工具。",
+      "shortDescEn": "The ultra fast download utility.",
+      "type": "tool",
+      "limit": 0,
+      "crossVersionUpdate": false,
+      "website": "https://aria2.github.io/",
+      "github": "https://github.com/aria2/aria2",
+      "document": "https://aria2.github.io/manual/en/html/index.html"
+    },
+    {
+      "key": "aria-ng",
+      "name": "AriaNg",
+      "tags": [
+        "Tool"
+      ],
+      "versions": [
+        "1.3.3"
+      ],
+      "shortDescZh": "让 aria2 更容易使用的现代 Web 前端。",
+      "shortDescEn": "AriaNg is a modern web frontend making aria2 easier to use.",
+      "type": "tool",
+      "limit": 0,
+      "crossVersionUpdate": false,
+      "website": "http://ariang.mayswind.net/zh_Hans",
+      "github": "https://github.com/mayswind/AriaNg",
+      "document": "http://ariang.mayswind.net/zh_Hans/"
+    },
+    {
+      "key": "bark-server",
+      "name": "BarkServer",
+      "tags": [
+        "Tool"
+      ],
+      "versions": [
+        "1.0.0"
+      ],
+      "shortDescZh": "Bark 服务后端，用来接收用户的推送请求并转发给苹果APNS。",
+      "shortDescEn": "bBark service backend that receives push requests from users and forwards them to Apple's APNS.",
+      "type": "tool",
+      "limit": 0,
+      "crossVersionUpdate": false,
+      "website": "https://github.com/adams549659584/bark-server",
+      "github": "https://github.com/adams549659584/bark-server",
+      "document": "https://day.app/2018/06/bark-server-document/"
+    },
+    {
+      "key": "chatgpt-web",
+      "name": "ChatGPT Web",
+      "tags": [
+        "WebSite"
+      ],
+      "versions": [
+        "1.0.0"
+      ],
+      "shortDescZh": "用 Express 和 Vue3 搭建的 ChatGPT 演示网页。",
+      "shortDescEn": "A demonstration webpage of ChatGPT built with Express and Vue3.",
+      "type": "website",
+      "limit": 0,
+      "crossVersionUpdate": true,
+      "website": "https://github.com/adams549659584/chatgpt-web",
+      "github": "https://github.com/adams549659584/chatgpt-web",
+      "document": "https://github.com/adams549659584/chatgpt-web"
+    },
+    {
+      "key": "x-ui",
+      "name": "x-ui",
+      "tags": [
+        "WebSite"
+      ],
+      "versions": [
+        "0.3.2"
+      ],
+      "shortDescZh": "支持多协议多用户的 xray 面板。",
+      "shortDescEn": "Xray panel that supports multiple protocols and users.",
+      "type": "website",
+      "limit": 0,
+      "crossVersionUpdate": true,
+      "website": "https://github.com/vaxilu/x-ui",
+      "github": "https://github.com/adams549659584/docker-x-ui",
+      "document": "https://github.com/vaxilu/x-ui"
+    },
+    {
+      "key": "gitlab",
+      "name": "gitlab",
+      "tags": [
+        "WebSite"
+      ],
+      "versions": [
+        "15.8.3"
+      ],
+      "shortDescZh": "GitLab",
+      "shortDescEn": "GitLab",
+      "type": "website",
+      "limit": 0,
+      "crossVersionUpdate": true,
+      "website": "https://about.gitlab.com/",
+      "github": "https://gitlab.com/gitlab-org/gitlab",
+      "document": "https://docs.gitlab.com/"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "formFields": [
+    {
+      "type": "number",
+      "labelZh": "端口",
+      "labelEn": "PORT",
+      "required": true,
+      "default": 6801,
+      "rule": "paramPort",
+      "envKey": "PANEL_APP_PORT_HTTP",
+      "edit": true
+    }
+  ]
+}

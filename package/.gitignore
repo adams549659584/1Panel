@@ -1,0 +1,4 @@
+
+dev/v*
+dev/appstore/*.tar.gz
+dev/release/*.tar.gz

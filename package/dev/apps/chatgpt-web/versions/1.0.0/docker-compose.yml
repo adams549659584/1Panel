@@ -1,0 +1,41 @@
+version: '3'
+
+services:
+  chatgpt-web:
+    image: adams549659584/chatgpt-web:latest # 总是使用latest,更新时重新pull该tag镜像即可
+    container_name: ${CONTAINER_NAME}
+    restart: unless-stopped
+    ports:
+      - ${PANEL_APP_PORT_HTTP}:3002
+    # 加入指定网络
+    networks:
+      -  1panel-network      
+    environment:
+      # 二选一   API
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      # API接口地址，可选，设置 OPENAI_API_KEY 时可用
+      OPENAI_API_BASE_URL: ${OPENAI_API_BASE_URL}
+      # API模型，可选，设置 OPENAI_API_KEY 时可用
+      OPENAI_API_MODEL: ${OPENAI_API_MODEL}
+      # 二选一   TOKEN
+      OPENAI_ACCESS_TOKEN: ${OPENAI_ACCESS_TOKEN}
+      # 反向代理，可选 https://bypass.churchless.tech/api/conversation https://gpt.pawan.krd/backend-api/conversation
+      API_REVERSE_PROXY: ${API_REVERSE_PROXY}
+      # 访问权限密钥，可选
+      AUTH_SECRET_KEY: ${AUTH_SECRET_KEY}
+      # 每小时最大请求次数，可选，默认无限
+      # MAX_REQUEST_PER_HOUR: 20
+      # 超时，单位毫秒，可选
+      TIMEOUT_MS: ${TIMEOUT_MS}
+      # Socks代理，可选，和 SOCKS_PROXY_PORT 一起时生效
+      # SOCKS_PROXY_HOST: xxxx
+      # Socks代理端口，可选，和 SOCKS_PROXY_HOST 一起时生效
+      # SOCKS_PROXY_PORT: xxxx
+      # HTTPS_PROXY 代理，可选
+      # HTTPS_PROXY: http://xxxx:7890
+      # 是否支持长回复，可能导致API费用较高
+      VITE_GLOB_OPEN_LONG_REPLY: ${VITE_GLOB_OPEN_LONG_REPLY}
+
+networks:
+  1panel-network:
+    external: true      

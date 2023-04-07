@@ -1,0 +1,36 @@
+version: '3'
+services:
+  aria2:
+    # 镜像名称
+    image: p3terx/aria2-pro:latest
+    # 容器名称
+    container_name: ${CONTAINER_NAME}
+    environment:
+      - PUID=65534
+      - PGID=65534
+      - UMASK_SET=022
+      - RPC_SECRET=${PANEL_RPC_SECRET}
+      - RPC_PORT=${PANEL_APP_PORT_HTTP}
+      - LISTEN_PORT=${PANEL_LISTEN_PORT}
+      - DISK_CACHE=64M
+      - IPV6_MODE=false
+      - UPDATE_TRACKERS=true
+      - CUSTOM_TRACKER_URL=
+      - TZ=Asia/Shanghai
+    # 自启动
+    restart: unless-stopped
+    # 加入指定网络
+    networks:
+      - 1panel-network
+    ports:
+      - ${PANEL_APP_PORT_HTTP}:6800
+      - ${PANEL_LISTEN_PORT}:6888
+      - ${PANEL_LISTEN_PORT}:6888/udp
+    # 以 Compose 配置文件为中心的相对路径作为数据卷挂载到容器。
+    volumes:
+      - ./config:/config
+      - ./downloads:/downloads
+
+networks:
+  1panel-network:
+    external: true

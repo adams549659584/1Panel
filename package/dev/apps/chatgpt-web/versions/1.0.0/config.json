@@ -1,0 +1,104 @@
+{
+  "formFields": [
+    {
+      "type": "number",
+      "labelZh": "应用端口",
+      "labelEn": "Port",
+      "required": true,
+      "default": 3002,
+      "rule": "paramPort",
+      "envKey": "PANEL_APP_PORT_HTTP",
+      "edit": true
+    },
+    {
+      "type": "text",
+      "labelZh": "OPENAI_API_KEY",
+      "labelEn": "OPENAI_API_KEY",
+      "default": "",
+      "envKey": "OPENAI_API_KEY",
+      "edit": true
+    },
+    {
+      "type": "text",
+      "labelZh": "OpenAI API 接口地址",
+      "labelEn": "OpenAI API Base Url",
+      "default": "https://api.openai.com",
+      "rule": "paramExtUrl",
+      "envKey": "OPENAI_API_BASE_URL",
+      "edit": true
+    },
+    {
+      "type": "text",
+      "labelZh": "OpenAI API 模型",
+      "labelEn": "OpenAI API Model",
+      "default": "gpt-3.5-turbo",
+      "rule": "paramCommon",
+      "envKey": "OPENAI_API_MODEL",
+      "edit": true
+    },
+    {
+      "type": "text",
+      "labelZh": "OPENAI_ACCESS_TOKEN",
+      "labelEn": "OPENAI_ACCESS_TOKEN",
+      "default": "",
+      "envKey": "OPENAI_ACCESS_TOKEN",
+      "edit": true
+    },
+    {
+      "type": "select",
+      "labelZh": "反向代理",
+      "labelEn": "API Reverse Proxy",
+      "default": "",
+      "values": [
+        {
+          "label": "https://bypass.churchless.tech/api/conversation",
+          "value": "https://bypass.churchless.tech/api/conversation"
+        },
+        {
+          "label": "https://gpt.pawan.krd/backend-api/conversation",
+          "value": "https://gpt.pawan.krd/backend-api/conversation"
+        }
+      ],
+      "rule": "paramExtUrl",
+      "envKey": "API_REVERSE_PROXY",
+      "edit": true
+    },
+    {
+      "type": "password",
+      "labelZh": "访问权限密钥",
+      "labelEn": "Auth Secret Key",
+      "default": "",
+      "rule": "paramCommon",
+      "envKey": "AUTH_SECRET_KEY",
+      "edit": true
+    },
+    {
+      "type": "number",
+      "labelZh": "超时，单位毫秒",
+      "labelEn": "timeout/ms",
+      "default": 60000,
+      "rule": "paramCommon",
+      "envKey": "TIMEOUT_MS",
+      "edit": true
+    },
+    {
+      "type": "select",
+      "labelZh": "是否支持长回复，可能导致API费用较高。",
+      "labelEn": "whether to support long reply may lead to a higher cost of API.",
+      "default": "true",
+      "values": [
+        {
+          "label": "true",
+          "value": "true"
+        },
+        {
+          "label": "false",
+          "value": "false"
+        }
+      ],
+      "rule": "paramCommon",
+      "envKey": "VITE_GLOB_OPEN_LONG_REPLY",
+      "edit": true
+    }
+  ]
+}

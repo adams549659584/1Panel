@@ -1,0 +1,34 @@
+{
+  "formFields": [
+    {
+      "type": "password",
+      "labelZh": "RPC 密钥",
+      "labelEn": "RPC_SECRET",
+      "required": true,
+      "default": "aria2123456",
+      "rule": "paramComplexity",
+      "envKey": "PANEL_RPC_SECRET",
+      "edit": true
+    },
+    {
+      "type": "number",
+      "labelZh": "RPC端口",
+      "labelEn": "RPC_PORT",
+      "required": true,
+      "default": 6800,
+      "rule": "paramPort",
+      "envKey": "PANEL_APP_PORT_HTTP",
+      "edit": true
+    },
+    {
+      "type": "number",
+      "labelZh": "监听端口",
+      "labelEn": "LISTEN_PORT",
+      "required": true,
+      "default": 6888,
+      "rule": "paramPort",
+      "envKey": "PANEL_LISTEN_PORT",
+      "edit": true
+    }
+  ]
+}
