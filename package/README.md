@@ -65,3 +65,38 @@ log:
   log_suffix: .log
   max_backup: 10
 ```
+
+
+```go
+// docker 容器网络问题，先用旧版
+// backend/app/service/app_utils.go unApp
+func upApp(ctx context.Context, appInstall model.AppInstall) {
+	out, err := compose.Up(appInstall.GetComposePath())
+	if err != nil {
+		if out != "" {
+			appInstall.Message = out
+		} else {
+			appInstall.Message = err.Error()
+		}
+		appInstall.Status = constant.Error
+	} else {
+		appInstall.Status = constant.Running
+	}
+	exist, _ := appInstallRepo.GetFirst(commonRepo.WithByID(appInstall.ID))
+	if exist.ID > 0 {
+		_ = appInstallRepo.Save(context.Background(), &appInstall)
+	} else {
+		_ = appInstallRepo.Save(ctx, &appInstall)
+	}
+}
+
+// 测试时候不校验验证码
+// backend/utils/captcha/captcha.go
+func VerifyCode(codeID string, code string) error {
+	return nil
+}
+
+// docker 问题
+// backend/utils/docker/compose.go
+// GetComposeProject
+```
