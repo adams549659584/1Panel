@@ -67,6 +67,6 @@ function main() {
 }
 
 main $1 $2
-# ./download.sh
+# ./download.sh stable
 # ./download.sh dev v1.0.5
 # sudo chmod +x ./download.sh && ./download.sh dev v1.0.5 

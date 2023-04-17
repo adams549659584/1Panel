@@ -30,6 +30,8 @@ services:
     volumes:
       - ./config:/config
       - ./downloads:/downloads
+    labels:  
+      createdBy: "Apps"        
 
 networks:
   1panel-network:

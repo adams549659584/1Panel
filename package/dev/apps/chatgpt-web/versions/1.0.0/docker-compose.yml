@@ -35,6 +35,8 @@ services:
       # HTTPS_PROXY: http://xxxx:7890
       # 是否支持长回复，可能导致API费用较高
       VITE_GLOB_OPEN_LONG_REPLY: ${VITE_GLOB_OPEN_LONG_REPLY}
+    labels:  
+      createdBy: "Apps"        
 
 networks:
   1panel-network:

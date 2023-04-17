@@ -19,6 +19,8 @@ services:
       - ${PANEL_APP_PORT_HTTP}:6801
     volumes:
       - ./html:/var/www/html
+    labels:  
+      createdBy: "Apps"  
 
 networks:
   1panel-network:

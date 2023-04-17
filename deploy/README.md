@@ -2,14 +2,16 @@
 
 ```sh
 # 下载最新、解压 并进入
+MODE="dev" && \
 GOARCH="amd64" && \
-# VERSION="v1.0.5" && \
-VERSION=`curl -s https://api.github.com/repos/adams549659584/1Panel/releases/latest | grep tag_name | awk '{print $2}' | sed 's/[",]//g'`
+VERSION="v1.1.0.5" && \
+# VERSION=`curl -s https://api.github.com/repos/adams549659584/1Panel/releases/latest | grep tag_name | awk '{print $2}' | sed 's/[",]//g'`
 PACKAGE_NAME="1panel-${VERSION}-linux-${GOARCH}" && \
 PACKAGE_FILE_NAME="${PACKAGE_NAME}.tar.gz" && \
-PACKAGE_DOWNLOAD_URL="https://github.com/adams549659584/1Panel/releases/download/${VERSION}/${PACKAGE_FILE_NAME}" && \
+# PACKAGE_DOWNLOAD_URL="https://github.com/adams549659584/1Panel/releases/download/${VERSION}/${PACKAGE_FILE_NAME}" && \
 # 官网安装包
-# PACKAGE_DOWNLOAD_URL="https://resource.fit2cloud.com/1panel/package/dev/${VERSION}/release/${PACKAGE_FILE_NAME}" && \
+PACKAGE_DOWNLOAD_URL="https://resource.fit2cloud.com/1panel/package/${MODE}/${VERSION}/release/${PACKAGE_FILE_NAME}" && \
+# PACKAGE_DOWNLOAD_URL="https://b2.vcanbb.eu.org/1panel/package/${MODE}/${VERSION}/release/${PACKAGE_FILE_NAME}" && \
 # echo $PACKAGE_DOWNLOAD_URL && \
 curl -LOk -o ${PACKAGE_FILE_NAME} ${PACKAGE_DOWNLOAD_URL} && \
 tar zxvf ${PACKAGE_FILE_NAME} && \
