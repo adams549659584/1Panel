@@ -76,6 +76,7 @@
                         <template #default="{ row }">
                             {{ $t('website.' + row.type) }}
                             <span v-if="row.type === 'deployment'">[{{ row.appName }}]</span>
+                            <span v-if="row.type === 'runtime'">[{{ row.runtimeName }}]</span>
                         </template>
                     </el-table-column>
                     <el-table-column :label="$t('commons.table.status')" prop="status">
@@ -149,7 +150,7 @@
         <UploadDialog ref="uploadRef" />
         <Backups ref="dialogBackupRef" />
         <DefaultServer ref="defaultRef" />
-        <GroupDialog @search="search" ref="groupRef" />
+        <GroupDialog @search="listGroup" ref="groupRef" />
     </div>
 </template>
 
@@ -203,11 +204,11 @@ const maskShow = ref(true);
 const createRef = ref();
 const deleteRef = ref();
 const groupRef = ref();
-let openNginxConfig = ref(false);
-let nginxIsExist = ref(false);
-let containerName = ref('');
-let nginxStatus = ref('');
-let installPath = ref('');
+const openNginxConfig = ref(false);
+const nginxIsExist = ref(false);
+const containerName = ref('');
+const nginxStatus = ref('');
+const installPath = ref('');
 const uploadRef = ref();
 const dialogBackupRef = ref();
 const defaultRef = ref();
@@ -313,6 +314,7 @@ const submitDate = (row: any) => {
     UpdateWebsite(req).then(() => {
         row.change = true;
         MsgSuccess(i18n.global.t('commons.msg.updateSuccess'));
+        search();
     });
 };
 

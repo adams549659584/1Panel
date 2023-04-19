@@ -61,7 +61,6 @@
                         >
                             {{ $t('commons.button.disable') }}
                         </el-button>
-                        <el-divider direction="vertical" />
                         <el-button
                             type="primary"
                             v-if="dialogData.rowData.status === 'Disable'"
@@ -70,7 +69,8 @@
                         >
                             {{ $t('commons.button.enable') }}
                         </el-button>
-                        <el-button type="primary" :disabled="records.length <= 7" @click="cleanRecord()" link>
+                        <el-divider direction="vertical" />
+                        <el-button :disabled="!hasRecords" type="primary" @click="onClean" link>
                             {{ $t('commons.button.clean') }}
                         </el-button>
                     </span>
@@ -130,7 +130,7 @@
                         </el-card>
                     </el-col>
                     <el-col :span="16">
-                        <el-form label-position="top">
+                        <el-form label-position="top" :v-key="refresh">
                             <el-row type="flex" justify="center">
                                 <el-form-item class="descriptionWide" v-if="isBackup()">
                                     <template #label>
@@ -163,7 +163,7 @@
                                     <template #label>
                                         <span class="status-label">{{ $t('cronjob.database') }}</span>
                                     </template>
-                                    <span v-if="dialogData.rowData!.website !== 'all'" class="status-count">
+                                    <span v-if="dialogData.rowData!.dbName !== 'all'" class="status-count">
                                         {{ dialogData.rowData!.dbName }}
                                     </span>
                                     <span v-else class="status-count">
@@ -282,6 +282,32 @@
                 </div>
             </template>
         </LayoutContent>
+
+        <el-dialog
+            v-model="deleteVisiable"
+            :title="$t('commons.button.clean')"
+            width="30%"
+            :close-on-click-modal="false"
+        >
+            <el-form ref="deleteForm" label-position="left" v-loading="delLoading">
+                <el-form-item>
+                    <el-checkbox v-model="cleanData" :label="$t('cronjob.cleanData')" />
+                    <span class="input-help">
+                        {{ $t('cronjob.cleanDataHelper') }}
+                    </span>
+                </el-form-item>
+            </el-form>
+            <template #footer>
+                <span class="dialog-footer">
+                    <el-button @click="deleteVisiable = false" :disabled="delLoading">
+                        {{ $t('commons.button.cancel') }}
+                    </el-button>
+                    <el-button type="primary" @click="cleanRecord">
+                        {{ $t('commons.button.confirm') }}
+                    </el-button>
+                </span>
+            </template>
+        </el-dialog>
     </div>
 </template>
 
@@ -301,6 +327,7 @@ import { oneDark } from '@codemirror/theme-one-dark';
 import { MsgError, MsgInfo, MsgSuccess } from '@/utils/message';
 
 const loading = ref();
+const refresh = ref(false);
 const hasRecords = ref();
 
 let timer: NodeJS.Timer | null = null;
@@ -318,13 +345,17 @@ const currentRecord = ref<Cronjob.Record>();
 const currentRecordDetail = ref<string>('');
 const currentRecordIndex = ref();
 
+const deleteVisiable = ref();
+const delLoading = ref();
+const cleanData = ref();
+
 const acceptParams = async (params: DialogProps): Promise<void> => {
     dialogData.value = params;
     recordShow.value = true;
     search(true);
     timer = setInterval(() => {
         onRefresh();
-    }, 1000 * 10);
+    }, 1000 * 5);
 };
 
 const shortcuts = [
@@ -402,10 +433,7 @@ const onHandle = async (row: Cronjob.CronjobInfo) => {
         .then(() => {
             loading.value = false;
             MsgSuccess(i18n.global.t('commons.msg.operationSuccess'));
-            searchInfo.pageSize = searchInfo.pageSize * searchInfo.page;
-            searchInfo.page = 1;
-            records.value = [];
-            search(false);
+            onRefresh();
         })
         .catch(() => {
             loading.value = false;
@@ -483,7 +511,15 @@ const onRefresh = async () => {
         status: searchInfo.status,
     };
     const res = await searchRecords(params);
-    records.value = res.data.items || [];
+    if (res.data.items) {
+        records.value = res.data.items;
+        hasRecords.value = true;
+        currentRecord.value = records.value[0];
+    } else {
+        records.value = [];
+        hasRecords.value = false;
+        refresh.value = !refresh.value;
+    }
 };
 
 const onDownload = async (record: any, backupID: number) => {
@@ -540,16 +576,41 @@ const loadRecord = async (row: Cronjob.Record) => {
         currentRecordDetail.value = res.data;
     }
 };
+
+const onClean = async () => {
+    if (dialogData.value.rowData.type === 'shell' || dialogData.value.rowData.type === 'curl') {
+        ElMessageBox.confirm(i18n.global.t('commons.msg.clean'), i18n.global.t('commons.msg.deleteTitle'), {
+            confirmButtonText: i18n.global.t('commons.button.confirm'),
+            cancelButtonText: i18n.global.t('commons.button.cancel'),
+            type: 'warning',
+        }).then(async () => {
+            await cleanRecords(dialogData.value.rowData.id, cleanData.value)
+                .then(() => {
+                    delLoading.value = false;
+                    MsgSuccess(i18n.global.t('commons.msg.operationSuccess'));
+                    search(true);
+                })
+                .catch(() => {
+                    delLoading.value = false;
+                });
+        });
+    } else {
+        deleteVisiable.value = true;
+    }
+};
+
 const cleanRecord = async () => {
-    ElMessageBox.confirm(i18n.global.t('cronjob.cleanHelper'), i18n.global.t('commons.button.clean'), {
-        confirmButtonText: i18n.global.t('commons.button.confirm'),
-        cancelButtonText: i18n.global.t('commons.button.cancel'),
-        type: 'info',
-    }).then(async () => {
-        await cleanRecords(dialogData.value.rowData.id);
-        MsgSuccess(i18n.global.t('commons.msg.operationSuccess'));
-        search(true);
-    });
+    delLoading.value = true;
+    await cleanRecords(dialogData.value.rowData.id, cleanData.value)
+        .then(() => {
+            delLoading.value = false;
+            deleteVisiable.value = false;
+            MsgSuccess(i18n.global.t('commons.msg.operationSuccess'));
+            search(true);
+        })
+        .catch(() => {
+            delLoading.value = false;
+        });
 };
 
 function isBackup() {

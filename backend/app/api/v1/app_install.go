@@ -93,24 +93,24 @@ func (b *BaseApi) LoadPort(c *gin.Context) {
 
 // @Tags App
 // @Summary Search app password by key
-// @Description 获取应用密码
+// @Description 获取应用连接信息
 // @Accept json
 // @Param key path string true "request"
-// @Success 200 {string} password
+// @Success 200 {string} response.DatabaseConn
 // @Security ApiKeyAuth
-// @Router /apps/installed/loadpassword/:key [get]
-func (b *BaseApi) LoadPassword(c *gin.Context) {
+// @Router /apps/installed/conninfo/:key [get]
+func (b *BaseApi) LoadConnInfo(c *gin.Context) {
 	key, ok := c.Params.Get("key")
 	if !ok {
 		helper.ErrorWithDetail(c, constant.CodeErrBadRequest, constant.ErrTypeInvalidParams, errors.New("error key in path"))
 		return
 	}
-	password, err := appInstallService.LoadPassword(key)
+	conn, err := appInstallService.LoadConnInfo(key)
 	if err != nil {
 		helper.ErrorWithDetail(c, constant.CodeErrInternalServer, constant.ErrTypeInternalServer, err)
 		return
 	}
-	helper.SuccessWithData(c, password)
+	helper.SuccessWithData(c, conn)
 }
 
 // @Tags App
@@ -166,13 +166,10 @@ func (b *BaseApi) OperateInstalled(c *gin.Context) {
 		helper.ErrorWithDetail(c, constant.CodeErrBadRequest, constant.ErrTypeInvalidParams, err)
 		return
 	}
-	tx, ctx := helper.GetTxAndContext()
-	if err := appInstallService.Operate(ctx, req); err != nil {
-		tx.Rollback()
+	if err := appInstallService.Operate(req); err != nil {
 		helper.ErrorWithDetail(c, constant.CodeErrInternalServer, constant.ErrTypeInternalServer, err)
 		return
 	}
-	tx.Commit()
 	helper.SuccessWithData(c, nil)
 }
 

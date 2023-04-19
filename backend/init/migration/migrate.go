@@ -23,6 +23,8 @@ func Init() {
 		migrations.AddDefaultGroup,
 		migrations.AddTableRuntime,
 		migrations.UpdateTableApp,
+		migrations.UpdateTableHost,
+		migrations.UpdateTableWebsite,
 	})
 	if err := m.Migrate(); err != nil {
 		global.LOG.Error(err)

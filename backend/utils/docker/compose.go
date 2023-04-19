@@ -11,6 +11,7 @@ import (
 	"github.com/docker/docker/client"
 	"github.com/joho/godotenv"
 	"path"
+	"regexp"
 	"strings"
 	"time"
 )
@@ -88,7 +89,7 @@ func (s *ComposeService) ComposeBuild() error {
 	return s.Build(context.Background(), s.project, api.BuildOptions{})
 }
 
-func GetComposeProject(projectName, workDir string, yml []byte, env []byte) (*types.Project, error) {
+func GetComposeProject(projectName, workDir string, yml []byte, env []byte, skipNormalization bool) (*types.Project, error) {
 	var configFiles []types.ConfigFile
 	configFiles = append(configFiles, types.ConfigFile{
 		Filename: "docker-compose.yml",
@@ -103,9 +104,13 @@ func GetComposeProject(projectName, workDir string, yml []byte, env []byte) (*ty
 		ConfigFiles: configFiles,
 		Environment: envMap,
 	}
+	projectName = strings.ToLower(projectName)
+	reg, _ := regexp.Compile(`[^a-z0-9_-]+`)
+	projectName = reg.ReplaceAllString(projectName, "")
 	project, err := loader.Load(details, func(options *loader.Options) {
 		options.SetProjectName(projectName, true)
 		options.ResolvePaths = true
+		options.SkipNormalization = skipNormalization
 	})
 	if err != nil {
 		return nil, err

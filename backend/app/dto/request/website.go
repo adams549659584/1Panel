@@ -139,3 +139,20 @@ type WebsitePHPConfigUpdate struct {
 	ID     uint              `json:"id" validate:"required"`
 	Params map[string]string `json:"params" validate:"required"`
 }
+
+type WebsitePHPFileUpdate struct {
+	ID      uint   `json:"id" validate:"required"`
+	Type    string `json:"type" validate:"required"`
+	Content string `json:"content" validate:"required"`
+}
+
+type WebsiteUpdateDir struct {
+	ID      uint   `json:"id" validate:"required"`
+	SiteDir string `json:"siteDir" validate:"required"`
+}
+
+type WebsiteUpdateDirPermission struct {
+	ID    uint   `json:"id" validate:"required"`
+	User  string `json:"user" validate:"required"`
+	Group string `json:"group" validate:"required"`
+}

@@ -5,20 +5,39 @@ import (
 	"github.com/1Panel-dev/1Panel/backend/app/model"
 	"github.com/1Panel-dev/1Panel/backend/buserr"
 	"github.com/1Panel-dev/1Panel/backend/constant"
+	"github.com/1Panel-dev/1Panel/backend/global"
 	"github.com/1Panel-dev/1Panel/backend/utils/docker"
 	"github.com/1Panel-dev/1Panel/backend/utils/files"
+	"github.com/docker/cli/cli/command"
 	"github.com/subosito/gotenv"
+	"os"
 	"path"
 	"strings"
 )
 
-func buildRuntime(runtime *model.Runtime, service *docker.ComposeService) {
+func buildRuntime(runtime *model.Runtime, service *docker.ComposeService, oldImageID string) {
 	err := service.ComposeBuild()
 	if err != nil {
 		runtime.Status = constant.RuntimeError
 		runtime.Message = buserr.New(constant.ErrImageBuildErr).Error() + ":" + err.Error()
 	} else {
 		runtime.Status = constant.RuntimeNormal
+		if oldImageID != "" {
+			client, err := docker.NewClient()
+			if err == nil {
+				newImageID, err := client.GetImageIDByName(runtime.Image)
+				if err == nil && newImageID != oldImageID {
+					global.LOG.Infof("delete imageID [%s] ", oldImageID)
+					if err := client.DeleteImage(oldImageID); err != nil {
+						global.LOG.Errorf("delete imageID [%s] error %v", oldImageID, err)
+					} else {
+						global.LOG.Infof("delete old image success")
+					}
+				}
+			} else {
+				global.LOG.Errorf("delete imageID [%s] error %v", oldImageID, err)
+			}
+		}
 	}
 	_ = runtimeRepo.Save(runtime)
 }
@@ -65,12 +84,21 @@ func handleParams(image, runtimeType, runtimeDir string, params map[string]inter
 	return
 }
 
-func getComposeService(name, runtimeDir string, composeFile, env []byte) (*docker.ComposeService, error) {
-	project, err := docker.GetComposeProject(name, runtimeDir, composeFile, env)
+func getComposeService(name, runtimeDir string, composeFile, env []byte, skipNormalization bool) (*docker.ComposeService, error) {
+	project, err := docker.GetComposeProject(name, runtimeDir, composeFile, env, skipNormalization)
 	if err != nil {
 		return nil, err
 	}
-	composeService, err := docker.NewComposeService()
+	logPath := path.Join(runtimeDir, "build.log")
+	fileOp := files.NewFileOp()
+	if fileOp.Stat(logPath) {
+		_ = fileOp.DeleteFile(logPath)
+	}
+	file, err := os.Create(logPath)
+	if err != nil {
+		return nil, err
+	}
+	composeService, err := docker.NewComposeService(command.WithOutputStream(file))
 	if err != nil {
 		return nil, err
 	}

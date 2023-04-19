@@ -326,6 +326,40 @@ var doc = `{
                 }
             }
         },
+        "/apps/installed/conninfo/:key": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "获取应用连接信息",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "App"
+                ],
+                "summary": "Search app password by key",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "request",
+                        "name": "key",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/apps/installed/delete/check/:appInstallId": {
             "get": {
                 "security": [
@@ -355,40 +389,6 @@ var doc = `{
                         "description": "OK",
                         "schema": {
                             "type": "anrry"
-                        }
-                    }
-                }
-            }
-        },
-        "/apps/installed/loadpassword/:key": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "获取应用密码",
-                "consumes": [
-                    "application/json"
-                ],
-                "tags": [
-                    "App"
-                ],
-                "summary": "Search app password by key",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "request",
-                        "name": "key",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
                         }
                     }
                 }
@@ -2758,7 +2758,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.BatchDeleteReq"
+                            "$ref": "#/definitions/dto.CronjobBatchDelete"
                         }
                     }
                 ],
@@ -2911,7 +2911,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.OperateByID"
+                            "$ref": "#/definitions/dto.CronjobClean"
                         }
                     }
                 ],
@@ -6418,14 +6418,14 @@ var doc = `{
                         {
                             "db": "backup_accounts",
                             "input_colume": "id",
-                            "input_value": "ids",
+                            "input_value": "id",
                             "isList": true,
                             "output_colume": "type",
                             "output_value": "types"
                         }
                     ],
                     "bodyKeys": [
-                        "ids"
+                        "id"
                     ],
                     "formatEN": "delete backup account [types]",
                     "formatZH": "删除备份账号 [types]",
@@ -8083,6 +8083,57 @@ var doc = `{
                 }
             }
         },
+        "/websites/dir/update": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "更新网站目录",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Website"
+                ],
+                "summary": "Update Site Dir",
+                "parameters": [
+                    {
+                        "description": "request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.WebsiteUpdateDir"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "x-panel-log": {
+                    "BeforeFuntions": [
+                        {
+                            "db": "websites",
+                            "input_colume": "id",
+                            "input_value": "id",
+                            "isList": false,
+                            "output_colume": "primary_domain",
+                            "output_value": "domain"
+                        }
+                    ],
+                    "bodyKeys": [
+                        "id"
+                    ],
+                    "formatEN": "Update  domain [domain] dir",
+                    "formatZH": "更新网站 [domain] 目录",
+                    "paramKeys": []
+                }
+            }
+        },
         "/websites/dns": {
             "post": {
                 "security": [
@@ -8586,41 +8637,7 @@ var doc = `{
                 }
             }
         },
-        "/websites/php/config/:id": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "获取网站 php 配置",
-                "consumes": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Website"
-                ],
-                "summary": "Load websit php conf",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "request",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/response.PHPConfig"
-                        }
-                    }
-                }
-            }
-        },
-        "/websites/php/update": {
+        "/websites/php/config": {
             "post": {
                 "security": [
                     {
@@ -8667,6 +8684,175 @@ var doc = `{
                     ],
                     "formatEN": "[domain] PHP conf update",
                     "formatZH": "[domain] PHP 配置修改",
+                    "paramKeys": []
+                }
+            }
+        },
+        "/websites/php/config/:id": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "获取网站 php 配置",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Website"
+                ],
+                "summary": "Load websit php conf",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "request",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.PHPConfig"
+                        }
+                    }
+                }
+            }
+        },
+        "/websites/php/update": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "更新 php 配置",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Website PHP"
+                ],
+                "summary": "Update php conf",
+                "parameters": [
+                    {
+                        "description": "request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.WebsitePHPFileUpdate"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "x-panel-log": {
+                    "BeforeFuntions": [
+                        {
+                            "db": "websites",
+                            "input_colume": "id",
+                            "input_value": "websiteId",
+                            "isList": false,
+                            "output_colume": "primary_domain",
+                            "output_value": "domain"
+                        }
+                    ],
+                    "bodyKeys": [
+                        "websiteId"
+                    ],
+                    "formatEN": "Nginx conf update [domain]",
+                    "formatZH": "php 配置修改 [domain]",
+                    "paramKeys": []
+                }
+            }
+        },
+        "/websites/rewrite": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "获取伪静态配置",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Website"
+                ],
+                "summary": "Get rewrite conf",
+                "parameters": [
+                    {
+                        "description": "request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.NginxRewriteReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/websites/rewrite/update": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "更新伪静态配置",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Website"
+                ],
+                "summary": "Update rewrite conf",
+                "parameters": [
+                    {
+                        "description": "request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.NginxRewriteUpdate"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "x-panel-log": {
+                    "BeforeFuntions": [
+                        {
+                            "db": "websites",
+                            "input_colume": "id",
+                            "input_value": "websiteID",
+                            "isList": false,
+                            "output_colume": "primary_domain",
+                            "output_value": "domain"
+                        }
+                    ],
+                    "bodyKeys": [
+                        "websiteID"
+                    ],
+                    "formatEN": "Nginx conf rewrite update [domain]",
+                    "formatZH": "伪静态配置修改 [domain]",
                     "paramKeys": []
                 }
             }
@@ -9654,6 +9840,34 @@ var doc = `{
                 }
             }
         },
+        "dto.CronjobBatchDelete": {
+            "type": "object",
+            "properties": {
+                "cleanData": {
+                    "type": "boolean"
+                },
+                "ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            }
+        },
+        "dto.CronjobClean": {
+            "type": "object",
+            "required": [
+                "cronjobID"
+            ],
+            "properties": {
+                "cleanData": {
+                    "type": "boolean"
+                },
+                "cronjobID": {
+                    "type": "integer"
+                }
+            }
+        },
         "dto.CronjobCreate": {
             "type": "object",
             "required": [
@@ -9831,6 +10045,12 @@ var doc = `{
                     "items": {
                         "type": "string"
                     }
+                },
+                "iptables": {
+                    "type": "boolean"
+                },
+                "isSwarm": {
+                    "type": "boolean"
                 },
                 "liveRestore": {
                     "type": "boolean"
@@ -10215,6 +10435,9 @@ var doc = `{
                         "key"
                     ]
                 },
+                "passPhrase": {
+                    "type": "string"
+                },
                 "password": {
                     "type": "string"
                 },
@@ -10258,8 +10481,20 @@ var doc = `{
                 "name": {
                     "type": "string"
                 },
+                "passPhrase": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
                 "port": {
                     "type": "integer"
+                },
+                "privateKey": {
+                    "type": "string"
+                },
+                "rememberPassword": {
+                    "type": "boolean"
                 },
                 "user": {
                     "type": "string"
@@ -10296,6 +10531,9 @@ var doc = `{
                 "name": {
                     "type": "string"
                 },
+                "passPhrase": {
+                    "type": "string"
+                },
                 "password": {
                     "type": "string"
                 },
@@ -10306,6 +10544,9 @@ var doc = `{
                 },
                 "privateKey": {
                     "type": "string"
+                },
+                "rememberPassword": {
+                    "type": "boolean"
                 },
                 "user": {
                     "type": "string"
@@ -11569,6 +11810,9 @@ var doc = `{
                 "required": {
                     "type": "string"
                 },
+                "resource": {
+                    "type": "string"
+                },
                 "shortDescEn": {
                     "type": "string"
                 },
@@ -11713,11 +11957,20 @@ var doc = `{
                 "proxy": {
                     "type": "string"
                 },
+                "proxyType": {
+                    "type": "string"
+                },
                 "remark": {
+                    "type": "string"
+                },
+                "rewrite": {
                     "type": "string"
                 },
                 "runtimeID": {
                     "type": "integer"
+                },
+                "siteDir": {
+                    "type": "string"
                 },
                 "status": {
                     "type": "string"
@@ -12287,6 +12540,40 @@ var doc = `{
                 }
             }
         },
+        "request.NginxRewriteReq": {
+            "type": "object",
+            "required": [
+                "name",
+                "websiteId"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "websiteId": {
+                    "type": "integer"
+                }
+            }
+        },
+        "request.NginxRewriteUpdate": {
+            "type": "object",
+            "required": [
+                "content",
+                "name",
+                "websiteId"
+            ],
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "websiteId": {
+                    "type": "integer"
+                }
+            }
+        },
         "request.NginxScopeReq": {
             "type": "object",
             "required": [
@@ -12738,6 +13025,25 @@ var doc = `{
                 }
             }
         },
+        "request.WebsitePHPFileUpdate": {
+            "type": "object",
+            "required": [
+                "content",
+                "id",
+                "type"
+            ],
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
         "request.WebsiteResourceReq": {
             "type": "object",
             "required": [
@@ -12865,6 +13171,21 @@ var doc = `{
                 }
             }
         },
+        "request.WebsiteUpdateDir": {
+            "type": "object",
+            "required": [
+                "id",
+                "siteDir"
+            ],
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "siteDir": {
+                    "type": "string"
+                }
+            }
+        },
         "request.WebsiteWafReq": {
             "type": "object",
             "required": [
@@ -12937,6 +13258,9 @@ var doc = `{
                     "type": "integer"
                 },
                 "required": {
+                    "type": "string"
+                },
+                "resource": {
                     "type": "string"
                 },
                 "shortDescEn": {
@@ -13263,11 +13587,23 @@ var doc = `{
                 "proxy": {
                     "type": "string"
                 },
+                "proxyType": {
+                    "type": "string"
+                },
                 "remark": {
+                    "type": "string"
+                },
+                "rewrite": {
                     "type": "string"
                 },
                 "runtimeID": {
                     "type": "integer"
+                },
+                "runtimeName": {
+                    "type": "string"
+                },
+                "siteDir": {
+                    "type": "string"
                 },
                 "sitePath": {
                     "type": "string"

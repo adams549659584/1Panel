@@ -44,5 +44,12 @@ func (a *WebsiteRouter) InitWebsiteRouter(Router *gin.RouterGroup) {
 
 		groupRouter.GET("/php/config/:id", baseApi.GetWebsitePHPConfig)
 		groupRouter.POST("/php/config", baseApi.UpdateWebsitePHPConfig)
+		groupRouter.POST("/php/update", baseApi.UpdatePHPFile)
+
+		groupRouter.POST("/rewrite", baseApi.GetRewriteConfig)
+		groupRouter.POST("/rewrite/update", baseApi.UpdateRewriteConfig)
+
+		groupRouter.POST("/dir/update", baseApi.UpdateSiteDir)
+		groupRouter.POST("/dir/permission", baseApi.UpdateSiteDirPermission)
 	}
 }

@@ -38,9 +38,9 @@ type IAppInstallService interface {
 	Page(req request.AppInstalledSearch) (int64, []response.AppInstalledDTO, error)
 	CheckExist(key string) (*response.AppInstalledCheck, error)
 	LoadPort(key string) (int64, error)
-	LoadPassword(key string) (string, error)
+	LoadConnInfo(key string) (response.DatabaseConn, error)
 	SearchForWebsite(req request.AppInstalledSearch) ([]response.AppInstalledDTO, error)
-	Operate(ctx context.Context, req request.AppInstalledOperate) error
+	Operate(req request.AppInstalledOperate) error
 	Update(req request.AppInstalledUpdate) error
 	SyncAll(systemInit bool) error
 	GetServices(key string) ([]response.AppService, error)
@@ -133,12 +133,16 @@ func (a *AppInstallService) LoadPort(key string) (int64, error) {
 	return app.Port, nil
 }
 
-func (a *AppInstallService) LoadPassword(key string) (string, error) {
+func (a *AppInstallService) LoadConnInfo(key string) (response.DatabaseConn, error) {
+	var data response.DatabaseConn
 	app, err := appInstallRepo.LoadBaseInfo(key, "")
 	if err != nil {
-		return "", nil
+		return data, nil
 	}
-	return app.Password, nil
+	data.Password = app.Password
+	data.ServiceName = app.ServiceName
+	data.Port = app.Port
+	return data, nil
 }
 
 func (a *AppInstallService) SearchForWebsite(req request.AppInstalledSearch) ([]response.AppInstalledDTO, error) {
@@ -174,8 +178,8 @@ func (a *AppInstallService) SearchForWebsite(req request.AppInstalledSearch) ([]
 	return handleInstalled(installs, false)
 }
 
-func (a *AppInstallService) Operate(ctx context.Context, req request.AppInstalledOperate) error {
-	install, err := appInstallRepo.GetFirstByCtx(ctx, commonRepo.WithByID(req.InstallId))
+func (a *AppInstallService) Operate(req request.AppInstalledOperate) error {
+	install, err := appInstallRepo.GetFirstByCtx(context.Background(), commonRepo.WithByID(req.InstallId))
 	if err != nil {
 		return err
 	}
@@ -202,7 +206,7 @@ func (a *AppInstallService) Operate(ctx context.Context, req request.AppInstalle
 		}
 		return syncById(install.ID)
 	case constant.Delete:
-		if err := deleteAppInstall(ctx, install, req.DeleteBackup, req.ForceDelete, req.DeleteDB); err != nil && !req.ForceDelete {
+		if err := deleteAppInstall(install, req.DeleteBackup, req.ForceDelete, req.DeleteDB); err != nil && !req.ForceDelete {
 			return err
 		}
 		return nil
@@ -221,27 +225,35 @@ func (a *AppInstallService) Update(req request.AppInstalledUpdate) error {
 		return err
 	}
 	changePort := false
+	var (
+		oldPorts []int
+		newPorts []int
+	)
 	port, ok := req.Params["PANEL_APP_PORT_HTTP"]
 	if ok {
 		portN := int(math.Ceil(port.(float64)))
 		if portN != installed.HttpPort {
+			oldPorts = append(oldPorts, installed.HttpPort)
 			changePort = true
 			httpPort, err := checkPort("PANEL_APP_PORT_HTTP", req.Params)
 			if err != nil {
 				return err
 			}
 			installed.HttpPort = httpPort
+			newPorts = append(newPorts, httpPort)
 		}
 	}
 	ports, ok := req.Params["PANEL_APP_PORT_HTTPS"]
 	if ok {
 		portN := int(math.Ceil(ports.(float64)))
 		if portN != installed.HttpsPort {
+			oldPorts = append(oldPorts, installed.HttpsPort)
 			httpsPort, err := checkPort("PANEL_APP_PORT_HTTPS", req.Params)
 			if err != nil {
 				return err
 			}
 			installed.HttpsPort = httpsPort
+			newPorts = append(newPorts, httpsPort)
 		}
 	}
 
@@ -285,6 +297,11 @@ func (a *AppInstallService) Update(req request.AppInstalledUpdate) error {
 		if err := nginxCheckAndReload(nginxInstall.SiteConfig.OldContent, config.FilePath, nginxInstall.Install.ContainerName); err != nil {
 			return buserr.WithErr(constant.ErrUpdateBuWebsite, err)
 		}
+	}
+	if changePort {
+		go func() {
+			_ = OperateFirewallPort(oldPorts, newPorts)
+		}()
 	}
 	return nil
 }

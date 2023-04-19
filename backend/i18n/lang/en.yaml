@@ -16,6 +16,7 @@ ErrRepoNotValid: "Remote repository verification failed！"
 #common
 ErrNameIsExist: "Name is already exist"
 ErrDemoEnvironment: "Demo server, prohibit this operation!"
+ErrCmdTimeout: "Command execution timed out！"
 
 #app
 ErrPortInUsed: "{{ .detail }} port already in use"
@@ -52,6 +53,7 @@ ErrEmailIsExist: 'Email is already exist'
 #mysql
 ErrUserIsExist: "The current user already exists. Please enter a new user"
 ErrDatabaseIsExist: "The current database already exists. Please enter a new database"
+ErrExecTimeOut: "SQL execution timed out, please check the {{ .detail }} container"
 
 #redis
 ErrTypeOfRedis: "The recovery file type does not match the current persistence mode. Modify the file type and try again"
@@ -66,3 +68,6 @@ ErrFileNotExist: "{{ .detail }} file does not exist! Please check source file in
 ErrImageBuildErr: "Image build failed"
 ErrImageExist: "Image is already exist！"
 ErrDelWithWebsite: "The operating environment has been associated with a website and cannot be deleted"
+
+#setting
+ErrBackupInUsed: "The backup account is already being used in a cronjob and cannot be deleted."

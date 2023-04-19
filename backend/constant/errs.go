@@ -60,6 +60,7 @@ var (
 	ErrDbUserNotValid      = "ErrDbUserNotValid"
 	ErrUpdateBuWebsite     = "ErrUpdateBuWebsite"
 	Err1PanelNetworkFailed = "Err1PanelNetworkFailed"
+	ErrCmdTimeout          = "ErrCmdTimeout"
 )
 
 // website
@@ -91,6 +92,7 @@ var (
 var (
 	ErrUserIsExist     = "ErrUserIsExist"
 	ErrDatabaseIsExist = "ErrDatabaseIsExist"
+	ErrExecTimeOut     = "ErrExecTimeOut"
 )
 
 // redis
@@ -111,4 +113,8 @@ var (
 	ErrImageBuildErr  = "ErrImageBuildErr"
 	ErrImageExist     = "ErrImageExist"
 	ErrDelWithWebsite = "ErrDelWithWebsite"
+)
+
+var (
+	ErrBackupInUsed = "ErrBackupInUsed"
 )

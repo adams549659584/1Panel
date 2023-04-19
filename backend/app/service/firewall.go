@@ -2,16 +2,20 @@ package service
 
 import (
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
 
 	"github.com/1Panel-dev/1Panel/backend/app/dto"
+	"github.com/1Panel-dev/1Panel/backend/constant"
 	"github.com/1Panel-dev/1Panel/backend/utils/cmd"
 	"github.com/1Panel-dev/1Panel/backend/utils/common"
 	"github.com/1Panel-dev/1Panel/backend/utils/firewall"
 	fireClient "github.com/1Panel-dev/1Panel/backend/utils/firewall/client"
 	"github.com/jinzhu/copier"
 )
+
+const confPath = "/etc/sysctl.conf"
 
 type FirewallService struct{}
 
@@ -32,10 +36,14 @@ func NewIFirewallService() IFirewallService {
 
 func (u *FirewallService) LoadBaseInfo() (dto.FirewallBaseInfo, error) {
 	var baseInfo dto.FirewallBaseInfo
+	baseInfo.PingStatus = u.pingStatus()
+	baseInfo.Status = "not running"
+	baseInfo.Version = "-"
+	baseInfo.Name = "-"
 	client, err := firewall.NewFirewallClient()
 	if err != nil {
 		if err.Error() == "no such type" {
-			return dto.FirewallBaseInfo{Name: "-", Version: "-", Status: "not running", PingStatus: "Disable"}, nil
+			return baseInfo, nil
 		}
 		return baseInfo, err
 	}
@@ -44,12 +52,7 @@ func (u *FirewallService) LoadBaseInfo() (dto.FirewallBaseInfo, error) {
 	if err != nil {
 		return baseInfo, err
 	}
-	baseInfo.PingStatus, err = client.PingStatus()
-	if err != nil {
-		return baseInfo, err
-	}
 	if baseInfo.Status == "not running" {
-		baseInfo.Version = "-"
 		return baseInfo, err
 	}
 	baseInfo.Version, err = client.Version()
@@ -110,8 +113,10 @@ func (u *FirewallService) SearchWithPage(req dto.RuleSearch) (int64, interface{}
 	if req.Type == "port" {
 		apps := u.loadPortByApp()
 		for i := 0; i < len(backDatas); i++ {
-			backDatas[i].IsUsed = common.ScanPortWithProtocol(backDatas[i].Port, backDatas[i].Protocol)
+			port, _ := strconv.Atoi(backDatas[i].Port)
+			backDatas[i].IsUsed = common.ScanPort(port)
 			if backDatas[i].Protocol == "udp" {
+				backDatas[i].IsUsed = common.ScanUDPPort(port)
 				continue
 			}
 			for _, app := range apps {
@@ -136,11 +141,8 @@ func (u *FirewallService) OperateFirewall(operation string) error {
 		if err := client.Start(); err != nil {
 			return err
 		}
-		serverPort, err := settingRepo.Get(settingRepo.WithByKey("ServerPort"))
-		if err != nil {
-			return err
-		}
-		if err := client.Port(fireClient.FireInfo{Port: serverPort.Value, Protocol: "tcp", Strategy: "accept"}, "add"); err != nil {
+		if err := u.addPortsBeforeStart(client); err != nil {
+			_ = client.Stop()
 			return err
 		}
 		_, _ = cmd.Exec("systemctl restart docker")
@@ -152,9 +154,9 @@ func (u *FirewallService) OperateFirewall(operation string) error {
 		_, _ = cmd.Exec("systemctl restart docker")
 		return nil
 	case "disablePing":
-		return client.UpdatePingStatus("0")
+		return u.updatePingStatus("0")
 	case "enablePing":
-		return client.UpdatePingStatus("1")
+		return u.updatePingStatus("1")
 	}
 	return fmt.Errorf("not support such operation: %s", operation)
 }
@@ -360,4 +362,79 @@ func (u *FirewallService) loadPortByApp() []portOfApp {
 	datas = append(datas, portOfApp{AppName: "1panel", HttpPort: systemPort.Value})
 
 	return datas
+}
+
+func (u *FirewallService) pingStatus() string {
+	if _, err := os.Stat("/etc/sysctl.conf"); err != nil {
+		return constant.StatusNone
+	}
+	stdout, _ := cmd.Exec("sudo cat /etc/sysctl.conf | grep net/ipv4/icmp_echo_ignore_all= ")
+	if stdout == "net/ipv4/icmp_echo_ignore_all=1\n" {
+		return constant.StatusEnable
+	}
+	return constant.StatusDisable
+}
+
+func (u *FirewallService) updatePingStatus(enabel string) error {
+	lineBytes, err := os.ReadFile(confPath)
+	if err != nil {
+		return err
+	}
+	files := strings.Split(string(lineBytes), "\n")
+	var newFiles []string
+	hasLine := false
+	for _, line := range files {
+		if strings.Contains(line, "net/ipv4/icmp_echo_ignore_all") || strings.HasPrefix(line, "net/ipv4/icmp_echo_ignore_all") {
+			newFiles = append(newFiles, "net/ipv4/icmp_echo_ignore_all="+enabel)
+			hasLine = true
+		} else {
+			newFiles = append(newFiles, line)
+		}
+	}
+	if !hasLine {
+		newFiles = append(newFiles, "net/ipv4/icmp_echo_ignore_all="+enabel)
+	}
+	file, err := os.OpenFile(confPath, os.O_WRONLY|os.O_TRUNC, 0666)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+	_, err = file.WriteString(strings.Join(newFiles, "\n"))
+	if err != nil {
+		return err
+	}
+
+	stdout, err := cmd.Exec("sudo sysctl -p")
+	if err != nil {
+		return fmt.Errorf("update ping status failed, err: %v", stdout)
+	}
+
+	return nil
+}
+
+func (u *FirewallService) addPortsBeforeStart(client firewall.FirewallClient) error {
+	serverPort, err := settingRepo.Get(settingRepo.WithByKey("ServerPort"))
+	if err != nil {
+		return err
+	}
+	if err := client.Port(fireClient.FireInfo{Port: serverPort.Value, Protocol: "tcp", Strategy: "accept"}, "add"); err != nil {
+		return err
+	}
+	if err := client.Port(fireClient.FireInfo{Port: "22", Protocol: "tcp", Strategy: "accept"}, "add"); err != nil {
+		return err
+	}
+	if err := client.Port(fireClient.FireInfo{Port: "80", Protocol: "tcp", Strategy: "accept"}, "add"); err != nil {
+		return err
+	}
+	if err := client.Port(fireClient.FireInfo{Port: "443", Protocol: "tcp", Strategy: "accept"}, "add"); err != nil {
+		return err
+	}
+	apps := u.loadPortByApp()
+	for _, app := range apps {
+		if err := client.Port(fireClient.FireInfo{Port: app.HttpPort, Protocol: "tcp", Strategy: "accept"}, "add"); err != nil {
+			return err
+		}
+	}
+
+	return client.Reload()
 }

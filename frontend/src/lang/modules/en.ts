@@ -3,6 +3,7 @@ const message = {
     commons: {
         true: 'true',
         false: 'false',
+        example: 'Such as：',
         button: {
             create: 'Create ',
             add: 'Add ',
@@ -78,7 +79,8 @@ const message = {
             Rollbacking: 'Rollbacking from snapshot, please wait...',
         },
         msg: {
-            delete: 'This operation cannot be rolled back. Do you want to continue',
+            delete: 'This operation delete cannot be rolled back. Do you want to continue?',
+            clean: 'This operation clean cannot be rolled back. Do you want to continue?',
             deleteTitle: 'Delete',
             deleteSuccess: 'Delete Success',
             loginSuccess: 'Login Success',
@@ -126,7 +128,7 @@ const message = {
             mfaCode: 'MFA verification code',
             title: 'Linux Server Management Panel',
             licenseHelper:
-                'Agree to FIT2CLOUD &laquo; <a href="https://www.fit2cloud.com/legal/licenses.html" target="_blank">Community Software License Agreement</a> &raquo;',
+                'Agree &laquo; <a href="https://www.fit2cloud.com/legal/licenses.html" target="_blank">Community License Agreement</a> &raquo;',
             errorAgree: 'Please click to agree to the Community Software License Agreement',
         },
         rule: {
@@ -284,6 +286,7 @@ const message = {
         logout: 'Logout',
     },
     database: {
+        database: 'database',
         delete: 'Delete operation cannot be rolled back, please input "',
         deleteHelper: '" to delete this database',
         create: 'Create database',
@@ -294,7 +297,10 @@ const message = {
         permission: 'Permission',
         permissionForIP: 'IP',
         permissionAll: 'All of them(%)',
+        databaseConnInfo: 'Conn info',
         rootPassword: 'Root password',
+        serviceName: 'Service Name',
+        serviceNameHelper: 'Access between containers in the same network.',
         backupList: 'Backup',
         backList: 'Return',
         loadBackup: 'Import',
@@ -416,6 +422,15 @@ const message = {
         rdbHelper2: 'The data',
         rdbHelper3: 'Meeting either condition triggers RDB persistence',
         rdbInfo: 'Ensure that the value in the rule list ranges from 1 to 100000',
+
+        containerConn: 'Container connection address',
+        containerConnHelper: 'PHP runtime environment/container-installed applications use this connection address',
+        remoteConn: 'External connection address',
+        remoteConnHelper2: 'Use this address for non-container or external connections',
+        localIP: 'Local IP',
+        userGroup: 'User/Group',
+        user: 'User',
+        uGroup: 'Group',
     },
     container: {
         createContainer: 'Create container',
@@ -452,7 +467,7 @@ const message = {
         containerPort: 'Container port',
         serverPort: 'Host port',
         cmd: 'Command',
-        cmdHelper: 'one in a row, for example: \n/bin/bash \necho "hello"',
+        cmdHelper: 'Example: echo "hello"',
         autoRemove: 'Auto remove',
         cpuQuota: 'NacosCPU',
         memoryLimit: 'Memory',
@@ -532,6 +547,7 @@ const message = {
         compose: 'Compose',
         composeHelper:
             'The current content has passed the format verification. Please click Submit to complete the creation',
+        composePathHelper: 'Config file save path: {0}',
         apps: 'Apps',
         local: 'Local',
         createCompose: 'Create compose',
@@ -555,9 +571,11 @@ const message = {
         daemonJsonPathHelper: 'Ensure that the configuration path is the same as that specified in docker.service.',
         mirrors: 'Registry mirrors',
         mirrorsHelper:
-            'If empty, mirror acceleration is disabled. The accelerated URL is used first for the operation, and will skipped when the request times out',
+            'Redirecting requests for a Docker image repository to a specified image accelerator can improve the download speed of the image',
         registries: 'Insecure registries',
-        liveHelper: 'Whether to close all containers when stopping the docker service',
+        liveHelper:
+            'Allows the running container state to be preserved in case of unexpected shutdown or crash of the Docker daemon',
+        liveWithSwarmHelper: 'live-restore daemon configuration is incompatible with swarm mode.',
         daemonJsonPath: 'Conf Path',
         serviceUnavailable: 'Docker service is not started at present, please click',
         startIn: ' to start',
@@ -585,16 +603,17 @@ const message = {
         cronSpec: 'Lifecycle',
         cronSpecHelper: 'Enter the correct execution period',
         cleanHelper:
-            'This operation will retain the latest seven task execution records and log files. Do you want to continue?',
+            'This operation records all job execution records, backup files, and log files. Do you want to continue?',
         directory: 'Backup directory',
         sourceDir: 'Backup directory',
         allOptionHelper:
-            'The current task plan is to back up all {0}. Direct download is not supported at the moment. You can check the backup list of {0} menu.',
+            'The current task plan is to back up all [{0}]. Direct download is not supported at the moment. You can check the backup list of [{0}] menu.',
         exclusionRules: 'Exclusive rule',
         saveLocal: 'Retain local backups (the same as the number of cloud storage copies)',
         url: 'URL Address',
         target: 'Target',
         retainCopies: 'Retain copies',
+        retainCopiesHelper: 'Number of copies of execution records, log files, and backup files',
         cronSpecRule: 'Please enter a correct lifecycle',
         perMonth: 'Every monthly',
         perWeek: 'Every week',
@@ -620,6 +639,8 @@ const message = {
         errRecord: 'Incorrect logging',
         errHandle: 'Task execution failure',
         noRecord: 'The execution did not generate any logs',
+        cleanData: 'Clean data',
+        cleanDataHelper: 'Delete the backup file generated during this task.',
         noLogs: 'No task output yet...',
         errPath: 'Backup path [{0}] error, cannot download!',
     },
@@ -671,10 +692,12 @@ const message = {
         port: 'Port',
         user: 'Username',
         authMode: 'Auth Mode',
-        passwordMode: 'password',
+        passwordMode: 'Password',
+        rememberPassword: 'Remember password',
         keyMode: 'PrivateKey',
         password: 'Password',
-        key: 'Private Key',
+        key: 'Private key',
+        keyPassword: 'Private key password',
         emptyTerminal: 'No terminal is currently connected',
     },
     logs: {
@@ -819,6 +842,7 @@ const message = {
         SFTP: 'SFTP',
         COS: 'Tencent COS',
         KODO: 'Qiniu Kodo',
+        domainHelper: 'The accelerated domain name must contain http:// or https://',
         backupAlert:
             "In theory, as long as the cloud provider is compatible with the S3 protocol, existing Amazon S3 cloud storage can be used for backup. For specific configurations, please refer to the <a target=“_blank” href='https://1panel.cn/docs/user_manual/settings/#3'>official documentation.</a> ",
         domain: 'Accelerate domain',
@@ -1097,7 +1121,7 @@ const message = {
         primaryPath: 'Main directory',
         folderTitle: 'The main directory of the website mainly contains four folders',
         wafFolder: 'Firewall Rules',
-        indexFolder: 'Static website root directory',
+        indexFolder: 'Website root directory',
         logFoler: 'website log',
         sslFolder: 'Website certificate',
         enableOrNot: 'Enable',
@@ -1144,13 +1168,23 @@ const message = {
         deleteRuntimeHelper:
             'The Runtime application needs to be deleted together with the website, please handle it with caution',
         proxyType: 'Listening Network Type',
-        unix: 'Uinx Network',
+        unix: 'Unix Network',
         tcp: 'TCP/IP Network',
         phpFPM: 'FPM Config',
         phpConfig: 'PHP Config',
         updateConfig: 'Update Config',
         isOn: 'On',
         isOff: 'Off',
+        rewrite: 'Pseudo Static',
+        rewriteMode: 'Scheme',
+        current: 'Current',
+        rewriteHelper:
+            'If the website cannot be accessed normally after setting pseudo-static, please try to set it back to default',
+        runDir: 'Run Directory',
+        runDirHelper:
+            'Some programs need to specify a secondary directory as the running directory, such as ThinkPHP5, Laravel',
+        runUserHelper:
+            'For websites deployed through the PHP runtime environment, all files, folder owners, and user groups under the index and subdirectories need to be set to 1000, command: chown -R 1000:1000 index',
     },
     php: {
         short_open_tag: 'Short tag support',
@@ -1212,6 +1246,8 @@ const message = {
             'This certificate has been associated with the following websites, and the renewal will be applied to these websites simultaneously',
     },
     firewall: {
+        notSupport:
+            'No system firewall detected (firewalld or ufw). Please refer to the official documentation for installation.',
         ccDeny: 'CC Protection',
         ipWhiteList: 'IP Whitelist',
         ipBlockList: 'IP Blacklist',
@@ -1248,7 +1284,7 @@ const message = {
         changeStrategyPortHelper1:
             'Change the port policy to [drop]. After the port policy is set, external access is denied. Do you want to continue?',
         changeStrategyPortHelper2:
-            'Change the port policy to [accept]. After the policy is set, normal port access will be restored. Do you want to continue?',
+            'Change the port policy to [accept]. After the port policy is set, normal port access will be restored. Do you want to continue?',
         stop: 'Stop',
         portFormatError: 'Please enter the correct port information!',
         portHelper1: 'Multiple ports, such as 8080 and 8081',
@@ -1267,7 +1303,6 @@ const message = {
         addressFormatError: 'Please enter a valid ip address!',
         addressHelper1: 'Multiple IP please separated with ",", such as 172.16.10.11, 172.16.10.99',
         addressHelper2: 'IP segment, such as 172.16.10.0/24',
-        addressHelper3: 'IP address range, such as 172.16.10.11-172.16.10.99',
         allIP: 'All IP',
         portRule: 'Port rule',
         ipRule: 'IP rule',
@@ -1275,7 +1310,7 @@ const message = {
     runtime: {
         runtime: 'Runtime',
         image: 'Image',
-        workDir: 'working directory',
+        workDir: 'Working directory',
         create: 'Create runtime',
         name: 'Name',
         resource: 'Source',
@@ -1285,6 +1320,11 @@ const message = {
         localHelper: 'The local operating environment needs to be installed by itself',
         version: 'Version',
         status: 'Status',
+        versionHelper: 'PHP version, e.g. v8.0',
+        buildHelper:
+            'The more extensions you select, the more CPU will be occupied during the image making process, so avoid selecting all extensions,If there is no extension you want, you can manually enter it and select it',
+        openrestryWarn: 'PHP needs to be upgraded to OpenResty to version 1.21.4.1 or later to use',
+        toupgrade: 'To Upgrade',
     },
 };
 

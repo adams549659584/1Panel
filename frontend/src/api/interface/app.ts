@@ -127,6 +127,11 @@ export namespace App {
         installPath: string;
     }
 
+    export interface DatabaseConnInfo {
+        password: string;
+        serviceName: string;
+        port: number;
+    }
     export interface AppInstallResource {
         type: string;
         name: string;

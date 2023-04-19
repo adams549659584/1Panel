@@ -34,7 +34,11 @@
                         <el-form-item :label="$t('runtime.app')" prop="appId">
                             <el-row :gutter="20">
                                 <el-col :span="12">
-                                    <el-select v-model="runtime.appId" :disabled="mode === 'edit'">
+                                    <el-select
+                                        v-model="runtime.appId"
+                                        :disabled="mode === 'edit'"
+                                        @change="changeApp(runtime.appId)"
+                                    >
                                         <el-option
                                             v-for="(app, index) in apps"
                                             :key="index"
@@ -59,6 +63,9 @@
                             <el-input v-model="runtime.image"></el-input>
                         </el-form-item>
                         <div v-if="initParam">
+                            <el-form-item v-if="runtime.type === 'php'">
+                                <el-alert :title="$t('runtime.buildHelper')" type="warning" :closable="false" />
+                            </el-form-item>
                             <Params
                                 v-if="mode === 'create'"
                                 v-model:form="runtime.params"
@@ -78,7 +85,7 @@
                             <el-alert :title="$t('runtime.localHelper')" type="info" :closable="false" />
                         </el-form-item>
                         <el-form-item :label="$t('runtime.version')" prop="version">
-                            <el-input v-model="runtime.version"></el-input>
+                            <el-input v-model="runtime.version" :placeholder="$t('runtime.versionHelper')"></el-input>
                         </el-form-item>
                     </div>
                 </el-form>
@@ -120,10 +127,10 @@ const runtimeForm = ref<FormInstance>();
 const loading = ref(false);
 const initParam = ref(false);
 const mode = ref('create');
-let appParams = ref<App.AppParams>();
-let editParams = ref<App.InstallParams[]>();
-let appVersions = ref<string[]>([]);
-let appReq = reactive({
+const appParams = ref<App.AppParams>();
+const editParams = ref<App.InstallParams[]>();
+const appVersions = ref<string[]>([]);
+const appReq = reactive({
     type: 'php',
     page: 1,
     pageSize: 20,
@@ -136,11 +143,11 @@ const runtime = ref<Runtime.RuntimeCreate>({
     type: 'php',
     resource: 'appstore',
 });
-let rules = ref<any>({
+const rules = ref<any>({
     name: [Rules.appName],
     resource: [Rules.requiredInput],
     appId: [Rules.requiredSelect],
-    version: [Rules.requiredInput],
+    version: [Rules.requiredInput, Rules.paramCommon],
     image: [Rules.requiredInput, Rules.imageName],
 });
 
@@ -180,6 +187,17 @@ const searchApp = (appId: number) => {
         }
     });
 };
+
+const changeApp = (appId: number) => {
+    for (const app of apps.value) {
+        if (app.id === appId) {
+            initParam.value = false;
+            getApp(app.key, mode.value);
+            break;
+        }
+    }
+};
+
 const getApp = (appkey: string, mode: string) => {
     GetApp(appkey).then((res) => {
         appVersions.value = res.data.versions || [];
@@ -254,6 +272,7 @@ const getRuntime = async (id: number) => {
 
 const acceptParams = async (props: OperateRrops) => {
     mode.value = props.mode;
+    initParam.value = false;
     if (props.mode === 'create') {
         runtime.value = {
             name: '',

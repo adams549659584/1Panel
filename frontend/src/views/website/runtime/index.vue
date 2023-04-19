@@ -51,10 +51,12 @@
                         :label="$t('commons.table.date')"
                         :formatter="dateFormat"
                         show-overflow-tooltip
+                        min-width="120"
+                        fix
                     />
                     <fu-table-operations
                         :ellipsis="10"
-                        width="260px"
+                        width="120px"
                         :buttons="buttons"
                         :label="$t('commons.table.operate')"
                         fixed="right"
@@ -149,3 +151,10 @@ onUnmounted(() => {
     timer = null;
 });
 </script>
+
+<style lang="scss" scoped>
+.open-warn {
+    color: $primary-color;
+    cursor: pointer;
+}
+</style>

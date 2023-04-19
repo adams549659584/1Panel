@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/1Panel-dev/1Panel/backend/app/api/v1/helper"
 	"github.com/compose-spec/compose-go/types"
 	"github.com/subosito/gotenv"
 	"math"
@@ -129,7 +130,23 @@ func createLink(ctx context.Context, app model.App, appInstall *model.AppInstall
 	return nil
 }
 
-func deleteAppInstall(ctx context.Context, install model.AppInstall, deleteBackup bool, forceDelete bool, deleteDB bool) error {
+func handleAppInstallErr(ctx context.Context, install *model.AppInstall) error {
+	op := files.NewFileOp()
+	appDir := install.GetPath()
+	dir, _ := os.Stat(appDir)
+	if dir != nil {
+		_, _ = compose.Down(install.GetComposePath())
+		if err := op.DeleteDir(appDir); err != nil {
+			return err
+		}
+	}
+	if err := deleteLink(ctx, install, true, true); err != nil {
+		return err
+	}
+	return nil
+}
+
+func deleteAppInstall(install model.AppInstall, deleteBackup bool, forceDelete bool, deleteDB bool) error {
 	op := files.NewFileOp()
 	appDir := install.GetPath()
 	dir, _ := os.Stat(appDir)
@@ -138,36 +155,34 @@ func deleteAppInstall(ctx context.Context, install model.AppInstall, deleteBacku
 		if err != nil && !forceDelete {
 			return handleErr(install, err, out)
 		}
-		if err := op.DeleteDir(appDir); err != nil && !forceDelete {
-			return err
-		}
 	}
+	tx, ctx := helper.GetTxAndContext()
+	defer tx.Rollback()
 	if err := appInstallRepo.Delete(ctx, install); err != nil {
 		return err
 	}
 	if err := deleteLink(ctx, &install, deleteDB, forceDelete); err != nil && !forceDelete {
 		return err
 	}
+	_ = backupRepo.DeleteRecord(ctx, commonRepo.WithByType("app"), commonRepo.WithByName(install.App.Key), backupRepo.WithByDetailName(install.Name))
+	_ = backupRepo.DeleteRecord(ctx, commonRepo.WithByType(install.App.Key))
+	if install.App.Key == constant.AppMysql {
+		_ = mysqlRepo.DeleteAll(ctx)
+	}
 	uploadDir := fmt.Sprintf("%s/1panel/uploads/app/%s/%s", global.CONF.System.BaseDir, install.App.Key, install.Name)
 	if _, err := os.Stat(uploadDir); err == nil {
 		_ = os.RemoveAll(uploadDir)
 	}
 	if deleteBackup {
-		localDir, err := loadLocalDir()
-		if err != nil && !forceDelete {
-			return err
-		}
+		localDir, _ := loadLocalDir()
 		backupDir := fmt.Sprintf("%s/app/%s/%s", localDir, install.App.Key, install.Name)
 		if _, err := os.Stat(backupDir); err == nil {
 			_ = os.RemoveAll(backupDir)
 		}
 		global.LOG.Infof("delete app %s-%s backups successful", install.App.Key, install.Name)
 	}
-	_ = backupRepo.DeleteRecord(ctx, commonRepo.WithByType("app"), commonRepo.WithByName(install.App.Key), backupRepo.WithByDetailName(install.Name))
-	_ = backupRepo.DeleteRecord(ctx, commonRepo.WithByType(install.App.Key))
-	if install.App.Key == constant.AppMysql {
-		_ = mysqlRepo.DeleteAll(ctx)
-	}
+	_ = op.DeleteDir(appDir)
+	tx.Commit()
 	return nil
 }
 
@@ -248,7 +263,7 @@ func getContainerNames(install model.AppInstall) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	project, err := composeV2.GetComposeProject(install.Name, install.GetPath(), []byte(install.DockerCompose), []byte(envStr))
+	project, err := composeV2.GetComposeProject(install.Name, install.GetPath(), []byte(install.DockerCompose), []byte(envStr), true)
 	if err != nil {
 		return nil, err
 	}
@@ -381,7 +396,7 @@ func copyAppData(key, version, installName string, params map[string]interface{}
 }
 
 // 处理文件夹权限等问题
-func upAppPre(app model.App, appInstall model.AppInstall) error {
+func upAppPre(app model.App, appInstall *model.AppInstall) error {
 	if app.Key == "nexus" {
 		dataPath := path.Join(appInstall.GetPath(), "data")
 		if err := files.NewFileOp().Chown(dataPath, 200, 0); err != nil {
@@ -391,7 +406,7 @@ func upAppPre(app model.App, appInstall model.AppInstall) error {
 	return nil
 }
 
-func getServiceFromInstall(appInstall model.AppInstall) (service *composeV2.ComposeService, err error) {
+func getServiceFromInstall(appInstall *model.AppInstall) (service *composeV2.ComposeService, err error) {
 	var (
 		project *types.Project
 		envStr  string
@@ -400,7 +415,7 @@ func getServiceFromInstall(appInstall model.AppInstall) (service *composeV2.Comp
 	if err != nil {
 		return
 	}
-	project, err = composeV2.GetComposeProject(appInstall.Name, appInstall.GetPath(), []byte(appInstall.DockerCompose), []byte(envStr))
+	project, err = composeV2.GetComposeProject(appInstall.Name, appInstall.GetPath(), []byte(appInstall.DockerCompose), []byte(envStr), true)
 	if err != nil {
 		return
 	}
@@ -412,11 +427,14 @@ func getServiceFromInstall(appInstall model.AppInstall) (service *composeV2.Comp
 	return
 }
 
-func upApp(ctx context.Context, appInstall model.AppInstall) {
-	upProject := func(appInstall model.AppInstall) (err error) {
+func upApp(appInstall *model.AppInstall) {
+	upProject := func(appInstall *model.AppInstall) (err error) {
 		if err == nil {
 			var composeService *composeV2.ComposeService
 			composeService, err = getServiceFromInstall(appInstall)
+			if err != nil {
+				return err
+			}
 			err = composeService.ComposeUp()
 			if err != nil {
 				return err
@@ -434,9 +452,7 @@ func upApp(ctx context.Context, appInstall model.AppInstall) {
 	}
 	exist, _ := appInstallRepo.GetFirst(commonRepo.WithByID(appInstall.ID))
 	if exist.ID > 0 {
-		_ = appInstallRepo.Save(context.Background(), &appInstall)
-	} else {
-		_ = appInstallRepo.Save(ctx, &appInstall)
+		_ = appInstallRepo.Save(context.Background(), appInstall)
 	}
 }
 
@@ -595,7 +611,7 @@ func getAppInstallByKey(key string) (model.AppInstall, error) {
 	return appInstall, nil
 }
 
-func updateToolApp(installed model.AppInstall) {
+func updateToolApp(installed *model.AppInstall) {
 	tooKey, ok := dto.AppToolMap[installed.App.Key]
 	if !ok {
 		return
